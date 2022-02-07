@@ -43,7 +43,8 @@ Getting started with the `smartsheet-rs` library is easy:
 
        println!("Printing sheet IDs and names:");
        for sheet in sheets.data {
-           println!("\t{id:<20}|\t{name}", id = sheet.id, name = sheet.name);
+           println!("{tab}{id:<20}|{tab}{name}",
+                    tab = '\t', id = sheet.id, name = sheet.name);
        }
 
        Ok(())
