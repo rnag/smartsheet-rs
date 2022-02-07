@@ -13,13 +13,13 @@ env variable is properly set.
 *On Mac/Linux*, this would be like:
 
 ```shell
-$ export SMARTSHEET_ACCESS_TOKEN = 'MY-TOKEN'
+❯❯ export SMARTSHEET_ACCESS_TOKEN = 'MY-TOKEN'
 ```
 
 *On Windows*, that would instead take the following form:
 
 ```shell
-> $env:SMARTSHEET_ACCESS_TOKEN = 'MY-TOKEN'
+❯❯ $env:SMARTSHEET_ACCESS_TOKEN = 'MY-TOKEN'
 ```
 
 Once that is done, you should be able to use
@@ -31,7 +31,7 @@ API.
 First, start out by cloning the GitHub project:
 
 ```shell
-$ git clone https://github.com/rnag/smartsheet-rs.git
+❯❯ git clone https://github.com/rnag/smartsheet-rs.git
 ```
 
 When running the examples, we'll often want to see the DEBUG logs from the library under test,
@@ -41,19 +41,19 @@ is properly set.
 For example, on *Mac/Linux*:
 
 ```shell
-$ export RUST_LOG='smartsheet_rs=TRACE'
+❯❯ export RUST_LOG='smartsheet_rs=TRACE'
 ```
 
 On *Windows*:
 
 ```shell
-> $env:RUST_LOG='smartsheet_rs=TRACE'
+❯❯ $env:RUST_LOG='smartsheet_rs=TRACE'
 ```
 
 Next, simply just `cd` into the project folder:
 
 ```shell
-$ cd smartsheet-rs
+❯❯ cd smartsheet-rs
 ```
 
 From here, you can use `cargo` to build and run
@@ -63,7 +63,7 @@ In particular, here's a simple example
 of retrieving a list of all sheets in the account:
 
 ```shell
-$ cargo run --example sheets
+❯❯ cargo run --example sheets
 ```
 
 To get the ID of a sheet, you can either examine the
@@ -74,5 +74,5 @@ Once you have the *sheet ID*, you can - for example -
 retrieve a list of all columns in the sheet:
 
 ```shell
-$ cargo run --example columns <sheet-id>
+❯❯ cargo run --example columns <sheet-id>
 ```
