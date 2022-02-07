@@ -7,7 +7,7 @@ To start out with, you'll need to create an *access token*
 as mentioned in the [Getting Started](https://smartsheet-platform.github.io/api-docs/#getting-started)
 guide.
 
-After that, you will need to ensure that the `SMARTSHEET_ACCESS_TOKEN`
+After that, you will need to ensure that the **SMARTSHEET_ACCESS_TOKEN**
 env variable is properly set.
 
 *On Mac/Linux*, this would be like:
@@ -34,14 +34,30 @@ First, start out by cloning the GitHub project:
 $ git clone https://github.com/rnag/smartsheet-rs.git
 ```
 
-Then just `cd` into the project folder:
+When running the examples, we'll often want to see the DEBUG logs from the library under test,
+`smartsheet-rs` in this case. Therefore, remember to ensure that the **RUST_LOG** env variable
+is properly set.
+
+For example, on *Mac/Linux*:
+
+```shell
+$ export RUST_LOG='smartsheet_rs=TRACE'
+```
+
+On *Windows*:
+
+```shell
+> $env:RUST_LOG='smartsheet_rs=TRACE'
+```
+
+Next, simply just `cd` into the project folder:
 
 ```shell
 $ cd smartsheet-rs
 ```
 
 From here, you can use `cargo` to build and run
-any of the examples individually. 
+any of the examples individually.
 
 In particular, here's a simple example
 of retrieving a list of all sheets in the account:
