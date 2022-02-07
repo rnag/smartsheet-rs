@@ -1,6 +1,6 @@
-/// Utilities to validate a response to ensure that its *status code*
-/// indicates that it is a success.
-///
+///! Utilities to validate a response to ensure that its *status code*
+///! indicates that it is a success.
+///!
 use crate::models::{RequestError, SmartsheetError};
 use crate::types::Result;
 use crate::utils::resp_to_string;

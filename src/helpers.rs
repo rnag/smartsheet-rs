@@ -1,5 +1,5 @@
-/// Public helper utilities
-///
+///! Public helper utilities
+///!
 use crate::models::{Cell, Column, Row};
 
 use core::option::Option;

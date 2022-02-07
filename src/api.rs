@@ -1,5 +1,5 @@
-/// Smartsheet API v2 implementation in Rust
-///
+///! Smartsheet API v2 implementation in Rust
+///!
 use crate::auth::auth_token;
 use crate::builders::ParamBuilder;
 use crate::constants::{API_ENDPOINT, ENV_VAR_NAME};
