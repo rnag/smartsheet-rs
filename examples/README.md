@@ -13,7 +13,7 @@ env variable is properly set.
 *On Mac/Linux*, this would be like:
 
 ```shell
-❯❯ export SMARTSHEET_ACCESS_TOKEN = 'MY-TOKEN'
+❯❯ export SMARTSHEET_ACCESS_TOKEN='MY-TOKEN'
 ```
 
 *On Windows*, that would instead take the following form:
