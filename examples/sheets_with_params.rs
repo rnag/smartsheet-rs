@@ -6,8 +6,22 @@ use std::time::Instant;
 use smartsheet_rs;
 use smartsheet_rs::models::{ListSheetIncludeFlags, Sheet};
 
+use tabled::{Alignment, Footer, Header, Modify, Row, Style, TableIteratorExt, Tabled};
+
 // A simple type alias so as to DRY.
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+
+/// Sheet data, representing a row in the nicely formatted table that gets
+/// printed to the console. For more info, check out the link below.
+///
+///   https://docs.rs/tabled
+#[derive(Tabled)]
+struct TableRow<'a> {
+    #[header("Sheet ID")]
+    id: u64,
+    #[header("Sheet Name")]
+    name: &'a str,
+}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -22,17 +36,53 @@ async fn main() -> Result<()> {
         ListSheetIncludeFlags::Source,
     ]);
 
-    let sheets = smart.list_sheets_with_params(include).await?;
+    let result = smart.list_sheets_with_params(include).await?;
 
-    println!("List Sheets With Params completed in {:?}", start.elapsed());
+    println!(
+        "List Sheets With Params completed in {:.2?}",
+        start.elapsed()
+    );
     println!();
 
-    println!("Sheet Count:  {}", sheets.total_count);
-    println!("Total Pages:  {}", sheets.total_pages);
-    println!("Page Number:  {}", sheets.page_number);
-    println!("Page Size:    {}", sheets.page_size);
+    println!("Sheet Count:  {}", result.total_count);
+    println!("Total Pages:  {}", result.total_pages);
+    println!("Page Number:  {}", result.page_number);
+    println!("Page Size:    {}", result.page_size);
+    println!();
 
-    if let Some(sheet) = sheets.data.first() {
+    // Print out the sheet data (IDs and names in this case) as a nicely
+    // formatted table.
+
+    let mut rows = Vec::with_capacity(result.total_count as usize);
+
+    for sheet in &result.data {
+        rows.push(TableRow {
+            id: sheet.id,
+            name: &sheet.name,
+        });
+    }
+
+    //noinspection DuplicatedCode
+    println!(
+        "{}",
+        rows.table()
+            .with(Style::PSEUDO)
+            .with(Modify::new(Row(1..)).with(Alignment::left()))
+            .with(Header("Available Sheets"))
+            .with(Footer(format!("{} Total Sheets", result.total_count)))
+    );
+
+    // Uncomment to print display on the first sheet
+    // print_info_on_first_sheet(&result.data).await?;
+
+    Ok(())
+}
+
+/// Print details on the first sheet in the response
+// noinspection DuplicatedCode
+#[allow(dead_code)]
+async fn print_info_on_first_sheet(sheets: &Vec<Sheet>) -> Result<()> {
+    if let Some(sheet) = sheets.first() {
         println!();
         println!("First Sheet:");
         println!("---");
@@ -44,23 +94,6 @@ async fn main() -> Result<()> {
             "Expected `version` to be populated"
         );
         assert!(sheet.source.is_some(), "Expected `source` to be populated");
-    }
-
-    // Uncomment to also display the name of each sheet
-    // print_sheet_names(&sheets.data).await?;
-
-    Ok(())
-}
-
-/// Print sheet names, given a list of sheets
-#[allow(dead_code)]
-async fn print_sheet_names(sheets: &Vec<Sheet>) -> Result<()> {
-    println!();
-    println!("Sheet Names:");
-    println!("---");
-
-    for sheet in sheets {
-        println!("  {}", sheet.name)
     }
 
     Ok(())
