@@ -11,18 +11,19 @@
 //!
 //! #[tokio::main]
 //! async fn main() -> std::result::Result<(), Box<dyn std::error::Error + Send + Sync>> {
-//!     // Note: replace the value with your token, or alternatively
-//!     // ensure that the `SMARTSHEET_ACCESS_TOKEN` env variable is
-//!     // set, and uncomment the following.
-//!     // let smart = SmartsheetApi::from_env()?;
-//!     let smart = SmartsheetApi::from_token("MY-TOKEN");
+//!     let smart = SmartsheetApi::from_env()?;
 //!     println!("Created a Smartsheet API client");
 //!
 //!     let sheets = smart.list_sheets().await?;
 //!
 //!     println!("Printing sheet IDs and names:");
 //!     for sheet in sheets.data {
-//!         println!("\t{id:<20}|\t{name}", id = sheet.id, name = sheet.name);
+//!         println!(
+//!             "{sep}{id:<20}|{sep}{name}",
+//!             sep = '\t',
+//!             id = sheet.id,
+//!             name = sheet.name
+//!         );
 //!     }
 //!
 //!     Ok(())
