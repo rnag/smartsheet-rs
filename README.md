@@ -43,7 +43,7 @@ Getting started with the `smartsheet-rs` library is easy:
 
        println!("Printing sheet names:");
        for sheet in sheets.data {
-           println!("  {}", sheet.name);
+           println!("  - {}", sheet.name);
        }
 
        Ok(())
