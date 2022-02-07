@@ -41,10 +41,9 @@ Getting started with the `smartsheet-rs` library is easy:
 
        let sheets = smart.list_sheets().await?;
 
-       println!("Printing sheet IDs and names:");
+       println!("Printing sheet names:");
        for sheet in sheets.data {
-           println!("{sep}{id:<20}|{sep}{name}",
-                    sep = '\t', id = sheet.id, name = sheet.name);
+           println!("  {}", sheet.name);
        }
 
        Ok(())
