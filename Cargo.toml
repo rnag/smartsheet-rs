@@ -9,7 +9,6 @@ license = "MIT"
 keywords = ["smartsheet",
             "api",
             "async",
-            "smartsheet-sdk",
             "smartsheet-api",
             "client"]
 categories = ["api-bindings"]
