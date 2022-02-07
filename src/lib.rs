@@ -20,9 +20,9 @@
 //!
 //!     let sheets = smart.list_sheets().await?;
 //!
-//!     println!("Printing sheet names:");
+//!     println!("Printing sheet IDs and names:");
 //!     for sheet in sheets.data {
-//!         println!("\t{}", sheet.name);
+//!         println!("\t{id:<20}|\t{name}", id = sheet.id, name = sheet.name);
 //!     }
 //!
 //!     Ok(())
