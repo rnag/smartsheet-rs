@@ -13,4 +13,6 @@ Possible header types:
 
 ## v0.1.0 (2022-01-01)
 
-- Initial Release on crates.io :tada:
+- Initial Release on [crates.io][] :tada:
+
+[crates.io]: https://crates.io/crates/smartsheet-rs
