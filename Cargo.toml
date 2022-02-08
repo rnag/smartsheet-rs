@@ -1,6 +1,6 @@
 [package]
 name = "smartsheet-rs"
-version = "0.2.0"
+version = "0.1.0"
 description = "Async Smartsheet API implementation in Rust"
 repository = "https://github.com/rnag/smartsheet-rs"
 authors = ["Ritvik Nag <rv.kvetch@gmail.com>"]
@@ -27,6 +27,7 @@ log = "0.4.14"
 
 [dev-dependencies]
 version-sync = "0.9.4"  # to ensure versions in `Cargo.toml` and `README.md` are in sync
+cargo-bump = "1.1.0"  # to bump package version and tag a commit at the same time
 tokio = { version = "1.16.1", features = ["rt-multi-thread", "macros"] }
 pretty_env_logger = "0.4.0"
 tabled = "0.4.2"  # for pretty-printing response data in the examples
