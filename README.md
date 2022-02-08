@@ -35,7 +35,7 @@ Getting started with the `smartsheet-rs` library is easy:
 
    ```toml
    [dependencies]
-   smartsheet-rs = "0.1"
+   smartsheet-rs = "0.2"
    tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
    ```
 
