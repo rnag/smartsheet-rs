@@ -69,6 +69,7 @@ have been implemented currently:
 - [List Columns](https://smartsheet-platform.github.io/api-docs/#list-columns)
 - [Get Sheet](https://smartsheet-platform.github.io/api-docs/#get-sheet)
 - [Get Row](https://smartsheet-platform.github.io/api-docs/#get-row)
+- [Get Column](https://smartsheet-platform.github.io/api-docs/#get-column)
 
 You can check out sample usage of these API methods in the [examples/](https://github.com/rnag/smartsheet-rs/tree/main/examples)
 folder in the project repo on GitHub.
