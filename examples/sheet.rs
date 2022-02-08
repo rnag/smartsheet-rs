@@ -82,7 +82,7 @@ async fn print_column_names_and_cell_values(row: Option<&Row>, cols: &Vec<Column
     let cols = ColumnMapper::new(cols);
 
     // Create a `CellGetter` helper to find cells in a row by `name`
-    let get_cell = CellGetter::from_mapper(&cols);
+    let get_cell = CellGetter::new(&cols);
 
     let start = Instant::now();
 

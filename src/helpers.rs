@@ -68,7 +68,7 @@ pub struct CellGetter<'a> {
 
 impl<'a> CellGetter<'a> {
     /// Create a new `CellGetter` from a reference to a `ColumnMapper` object
-    pub fn from_mapper(columns: &'a ColumnMapper<'a>) -> Self {
+    pub fn new(columns: &'a ColumnMapper<'a>) -> Self {
         Self {
             column_name_to_id: &columns.name_to_id,
         }

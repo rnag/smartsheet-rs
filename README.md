@@ -107,7 +107,7 @@ async fn main() -> Result<()> {
     let cols = ColumnMapper::new(&sheet.columns);
 
     // Create a `CellGetter` helper to find cells in a row by *Column Name*
-    let get_cell = CellGetter::from_mapper(&cols);
+    let get_cell = CellGetter::new(&cols);
 
     // Get the first row in the sheet. We could also access
     // a row by index, like `&sheet.rows[i]` for example.

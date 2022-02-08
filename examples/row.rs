@@ -101,7 +101,7 @@ async fn main() -> Result<()> {
     let cols = ColumnMapper::new(&row.columns);
 
     // Create a `CellGetter` helper to find cells in a row by `name`
-    let _get_cell = CellGetter::from_mapper(&cols);
+    let _get_cell = CellGetter::new(&cols);
 
     // Uncomment to display the column name + values of each cell in the row
     // print_column_names_and_cell_values(&row, &cols, _get_cell).await?;
