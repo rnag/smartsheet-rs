@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
 
     let sheet = smart.get_sheet(sheet_id).await?;
 
-    println!("Get Sheet completed in {:?}", start.elapsed());
+    println!("Get Sheet completed in {:.2?}", start.elapsed());
     println!();
 
     // Print out some basic info about the sheet

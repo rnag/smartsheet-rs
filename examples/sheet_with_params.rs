@@ -56,7 +56,7 @@ async fn main() -> Result<()> {
         .get_sheet_with_params(sheet_id, Some(include), Some(exclude))
         .await?;
 
-    println!("Get Sheet With Params completed in {:?}", start.elapsed());
+    println!("Get Sheet With Params completed in {:.2?}", start.elapsed());
     println!();
 
     // Print out some basic info about the sheet
