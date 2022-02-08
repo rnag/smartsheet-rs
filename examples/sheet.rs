@@ -91,7 +91,7 @@ async fn print_column_names_and_cell_values(row: Option<&Row>, cols: &Vec<Column
     println!("---");
 
     for (col_name, _col_id) in &cols.name_to_id {
-        if let Some(cell) = get_cell.by_name(row, col_name) {
+        if let Ok(cell) = get_cell.by_name(row, col_name) {
             println!("Column Name: {}", col_name);
             // Print out the cell value
             if let Ok(value) = cell.value_as_str() {

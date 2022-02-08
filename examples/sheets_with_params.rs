@@ -21,6 +21,8 @@ struct TableRow<'a> {
     id: u64,
     #[header("Sheet Name")]
     name: &'a str,
+    #[header("Owner")]
+    owner: &'a str,
 }
 
 #[tokio::main]
@@ -32,11 +34,16 @@ async fn main() -> Result<()> {
     let start = Instant::now();
 
     let include = Some(vec![
+        ListSheetIncludeFlags::OwnerInfo,
         ListSheetIncludeFlags::SheetVersion,
         ListSheetIncludeFlags::Source,
     ]);
 
-    let result = smart.list_sheets_with_params(include).await?;
+    let include_all = Some(true);
+
+    let result = smart
+        .list_sheets_with_params(include, include_all, None)
+        .await?;
 
     println!(
         "List Sheets With Params completed in {:.2?}",
@@ -59,6 +66,7 @@ async fn main() -> Result<()> {
         rows.push(TableRow {
             id: sheet.id,
             name: &sheet.name,
+            owner: &sheet.owner.as_ref().unwrap(),
         });
     }
 

@@ -81,7 +81,7 @@ impl<'a> SmartsheetApi<'a> {
     /// - https://smartsheet-platform.github.io/api-docs/#list-sheets
     ///
     pub async fn list_sheets(&self) -> Result<IndexResult<Sheet>> {
-        self.list_sheets_with_params(None).await
+        self.list_sheets_with_params(None, None, None).await
     }
 
     /// **List Sheets** - Gets a list of all sheets that the user has access
@@ -91,6 +91,8 @@ impl<'a> SmartsheetApi<'a> {
     /// # Arguments
     ///
     /// * `include` - A comma-separated list of elements to include in the response.
+    /// * `include_all` - If true, include all results (i.e. do not paginate).
+    /// * `modified_since` - Return sheets modified since a provided datetime.
     ///
     /// # Docs
     /// - https://smartsheet-platform.github.io/api-docs/#list-sheets
@@ -98,11 +100,17 @@ impl<'a> SmartsheetApi<'a> {
     pub async fn list_sheets_with_params(
         &self,
         include: Option<Vec<ListSheetIncludeFlags>>,
+        include_all: Option<bool>,
+        modified_since: Option<&str>, // TODO change this to a date type mayb
     ) -> Result<IndexResult<Sheet>> {
         let mut url = format!("{}/{}", self.endpoint, "sheets");
 
         let mut params = ParamBuilder::new();
+
         params.insert_comma_separated_values("include", include);
+        params.insert_value("includeAll", include_all);
+        params.insert_value("modifiedSince", modified_since);
+
         params.add_query_to_url(&mut url);
 
         debug!("URL: {}", url);
@@ -136,7 +144,8 @@ impl<'a> SmartsheetApi<'a> {
     /// - https://smartsheet-platform.github.io/api-docs/#row-include-flags
     ///
     pub async fn get_sheet(&self, sheet_id: u64) -> Result<Sheet> {
-        self.get_sheet_with_params(sheet_id, None, None).await
+        self.get_sheet_with_params(sheet_id, None, None, None, None, None, None)
+            .await
     }
 
     /// **Get Sheet** - Retrieves the specified sheet, with included
@@ -148,6 +157,17 @@ impl<'a> SmartsheetApi<'a> {
     /// * `sheet_id` - The Smartsheet to retrieve the rows and data for.
     /// * `include` - A comma-separated list of elements to include in the response.
     /// * `exclude` - A comma-separated list of elements to _not_ include in the response.
+    /// * `row_ids` - A comma-separated list of Row IDs on which to filter the
+    ///               rows included in the result.
+    /// * `row_numbers` - A comma-separated list of Row numbers on which to
+    ///                   filter the rows included in the result. Non-existent
+    ///                   row numbers are ignored.
+    /// * `column_ids` - A comma-separated comma-separated list of Column IDs.
+    ///                  The response will contain only the specified columns
+    ///                  in the 'columns' array, and individual rows' 'cells'
+    ///                  array will only contain cells in the specified columns.
+    /// * `rows_modified_since` - Date should be in ISO-8601 format, for
+    ///                           example, `2020-01-30T13:25:32-07:00`
     ///
     /// # Docs
     /// - https://smartsheet-platform.github.io/api-docs/#get-sheet
@@ -158,6 +178,10 @@ impl<'a> SmartsheetApi<'a> {
         sheet_id: u64,
         include: Option<Vec<SheetIncludeFlags>>,
         exclude: Option<Vec<SheetExcludeFlags>>,
+        row_ids: Option<Vec<u64>>,
+        row_numbers: Option<Vec<u64>>,
+        column_ids: Option<Vec<u64>>,
+        rows_modified_since: Option<&str>,
     ) -> Result<Sheet> {
         let mut url = format!("{}/{}/{}", self.endpoint, "sheets", sheet_id);
 
@@ -165,6 +189,10 @@ impl<'a> SmartsheetApi<'a> {
 
         params.insert_comma_separated_values("include", include);
         params.insert_comma_separated_values("exclude", exclude);
+        params.insert_comma_separated_values("rowIds", row_ids);
+        params.insert_comma_separated_values("rowNumbers", row_numbers);
+        params.insert_comma_separated_values("columnIds", column_ids);
+        params.insert_value("rowsModifiedSince", rows_modified_since);
 
         params.add_query_to_url(&mut url);
 
@@ -290,31 +318,34 @@ impl<'a> SmartsheetApi<'a> {
     /// - https://smartsheet-platform.github.io/api-docs/#list-columns
     ///
     pub async fn list_columns(&self, sheet_id: u64) -> Result<IndexResult<Column>> {
-        self.list_columns_with_level(sheet_id, None).await
+        self.list_columns_with_params(sheet_id, None, None).await
     }
 
-    /// **List Columns** - Gets a list of all columns belonging to the specified sheet.
+    /// **List Columns** - Gets a list of all columns belonging to the
+    /// specified sheet, with included _query parameters_.
     ///
     /// # Arguments
     ///
+    /// * `sheet_id` - The Smartsheet to retrieve the columns from.
     /// * `level` - Specifies whether multi-contact data is returned in a backwards-compatible,
     /// text format, or as multi-contact data.
+    /// * `include_all` - If true, include all results (i.e. do not paginate).
     ///
     /// # Docs
     /// - https://smartsheet-platform.github.io/api-docs/#list-columns
     ///
-    pub async fn list_columns_with_level(
+    pub async fn list_columns_with_params(
         &self,
         sheet_id: u64,
         level: Option<Level>,
+        include_all: Option<bool>,
     ) -> Result<IndexResult<Column>> {
         let mut url = format!("{}/{}/{}/{}", self.endpoint, "sheets", sheet_id, "columns");
 
-        if level.is_some() {
-            let mut params = ParamBuilder::new();
-            params.insert_value("level", level);
-            params.add_query_to_url(&mut url);
-        }
+        let mut params = ParamBuilder::new();
+        params.insert_value("level", level);
+        params.insert_value("includeAll", include_all);
+        params.add_query_to_url(&mut url);
 
         debug!("URL: {}", url);
 

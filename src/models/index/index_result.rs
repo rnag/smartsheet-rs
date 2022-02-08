@@ -14,7 +14,12 @@ pub struct IndexResult<T> {
     pub data: Vec<T>,
     #[serde(rename = "pageNumber")]
     pub page_number: u64,
+    // Page size of the operation
+    //
+    // *Note*: this value can be omitted in the response, for example
+    // when passing `include_all=true` in a **List Columns** request
     #[serde(rename = "pageSize")]
+    #[serde(default)]
     pub page_size: u64,
     #[serde(rename = "totalCount")]
     pub total_count: u64,

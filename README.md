@@ -113,11 +113,10 @@ async fn main() -> Result<()> {
     // a row by index, like `&sheet.rows[i]` for example.
     let first_row = sheet.rows.first().unwrap();
    
-   // Try to find a cell in the row by it's column name
-    if let Some(cell) = get_cell.by_name(first_row, COLUMN_NAME) {
-        println!("Here's the cell: {:#?}", *cell);
-    } else {
-        println!("No such cell for the specified column!")
+    // Try to find a cell in the row by it's column name
+    match get_cell.by_name(first_row, COLUMN_NAME) {
+        Ok(cell) => println!("Here's the cell: {:#?}", *cell),
+        Err(e) => println!("Error: {}", e),
     }
 
     Ok(())

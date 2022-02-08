@@ -113,10 +113,6 @@ async fn main() -> Result<()> {
         "Expected `permalink` to be populated"
     );
     assert!(
-        row.attachments.is_some(),
-        "Expected `attachments` to be populated"
-    );
-    assert!(
         row.created_by.is_some(),
         "Expected `created_by` to be populated"
     );
@@ -125,8 +121,9 @@ async fn main() -> Result<()> {
     println!("[ Permalink ]");
     println!("{}", row.permalink.as_ref().unwrap());
     println!("[ Attachments ]");
-    if let Some(attachments) = &row.attachments {
-        println!("{:#?}", attachments);
+    match &row.attachments {
+        Some(attachments) => println!("{:#?}", attachments),
+        None => println!("None"),
     }
 
     // Create `name` <-> `id` mappings for columns in the row
@@ -156,7 +153,7 @@ async fn print_column_names_and_cell_values<'a>(
     println!("---");
 
     for (col_name, _col_id) in &cols.name_to_id {
-        if let Some(cell) = get_cell.by_name(row, col_name) {
+        if let Ok(cell) = get_cell.by_name(row, col_name) {
             println!("Column Name: {}", col_name);
             // Print out the cell value
             if let Ok(value) = cell.value_as_str() {

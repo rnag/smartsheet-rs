@@ -30,7 +30,7 @@ pub async fn raise_for_status(request_url: String, resp: &mut Response<Body>) ->
     let status_code = resp.status().as_u16();
     let reason: String;
 
-    if 400 <= status_code && status_code < 500 {
+    if (400..500).contains(&status_code) {
         // Client Error
         reason = format!(
             "{status} Client Error: {reason} for url: {url}",
@@ -38,7 +38,7 @@ pub async fn raise_for_status(request_url: String, resp: &mut Response<Body>) ->
             reason = resp.status().canonical_reason().unwrap_or("Unknown"),
             url = request_url,
         );
-    } else if 500 <= status_code && status_code < 600 {
+    } else if (500..600).contains(&status_code) {
         // Server Error
         reason = format!(
             "{status} Server Error: {reason} for url: {url}",

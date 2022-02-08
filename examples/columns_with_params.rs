@@ -49,9 +49,10 @@ async fn main() -> Result<()> {
     let start = Instant::now();
 
     let target_level = Level::MultiPicklist;
+    let include_all = Some(true);
 
     let result = smart
-        .list_columns_with_level(sheet_id, Some(target_level))
+        .list_columns_with_params(sheet_id, Some(target_level), include_all)
         .await?;
 
     println!(
