@@ -11,6 +11,16 @@ This is an *unofficial* SDK I have made to learn Rust a little, but I hope you h
 I know that I certainly had quite a bit of fun in writing out the implementation for
 this crate.
 
+## Table of Contents
+
+* [Getting Started](#getting-started)
+* [Implemented Methods](#implemented-methods)
+* [A Larger Example](#a-larger-example)
+* [Dependencies](#dependencies)
+* [Contributing](#contributing)
+* [License](#license)
+* [Authors](#authors)
+
 ## Getting Started
 
 Getting started with the `smartsheet-rs` library is easy:
@@ -49,6 +59,19 @@ Getting started with the `smartsheet-rs` library is easy:
        Ok(())
    }
    ```
+
+## Implemented Methods
+
+The following API methods from the [official documentation](https://smartsheet-platform.github.io/api-docs)
+have been implemented currently:
+
+- [List Sheets](https://smartsheet-platform.github.io/api-docs/#list-sheets)
+- [List Columns](https://smartsheet-platform.github.io/api-docs/#list-columns)
+- [Get Sheet](https://smartsheet-platform.github.io/api-docs/#get-sheet)
+- [Get Row](https://smartsheet-platform.github.io/api-docs/#get-row)
+
+You can check out sample usage of these API methods in the [examples/](https://github.com/rnag/smartsheet-rs/tree/main/examples)
+folder in the project repo on GitHub.
 
 ## A Larger Example
 
@@ -101,19 +124,6 @@ async fn main() -> Result<()> {
 }
 ```
 
-## Implemented Methods
-
-The following API methods from the [official documentation](https://smartsheet-platform.github.io/api-docs)
-have been implemented currently:
-
-- [List Sheets](https://smartsheet-platform.github.io/api-docs/#list-sheets)
-- [List Columns](https://smartsheet-platform.github.io/api-docs/#list-columns)
-- [Get Sheet](https://smartsheet-platform.github.io/api-docs/#get-sheet)
-- [Get Row](https://smartsheet-platform.github.io/api-docs/#get-row)
-
-You can check out sample usage of these API methods in the [examples/](https://github.com/rnag/smartsheet-rs/tree/main/examples)
-folder in the project repo on GitHub.
-
 ## Dependencies
 
 This library uses only the minimum required dependencies, in order
@@ -122,3 +132,25 @@ internally, to make HTTPS requests to the Smartsheet API.
 
 [`hyper`]: https://docs.rs/hyper
 [`hyper-tls`]: https://docs.rs/hyper-tls
+
+## Contributing
+
+Contributions are welcome! Open a pull request to fix a bug, or [open an issue][]
+to discuss a new feature or change.
+
+Check out the [Contributing][] section in the docs for more info.
+
+[Contributing]: CONTRIBUTING.md
+[open an issue]: https://github.com/rnag/smartsheet-rs/issues
+
+## License
+
+This project is proudly licensed under the MIT license ([LICENSE](LICENSE)
+or http://opensource.org/licenses/MIT).
+
+`smartsheet-rs` can be distributed according to the MIT license. Contributions
+will be accepted under the same license.
+
+## Authors
+
+* [Ritvik Nag](https://github.com/rnag)
