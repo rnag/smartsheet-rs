@@ -6,6 +6,7 @@ use core::fmt;
 ///   https://smartsheet-platform.github.io/api-docs/#list-sheets
 #[derive(Debug)]
 pub enum ListSheetIncludeFlags {
+    OwnerInfo,
     SheetVersion,
     Source,
 }
@@ -13,6 +14,7 @@ pub enum ListSheetIncludeFlags {
 impl EnumStr for ListSheetIncludeFlags {
     fn as_str<'a>(&self) -> &'a str {
         match self {
+            Self::OwnerInfo => "ownerInfo",
             Self::SheetVersion => "sheetVersion",
             Self::Source => "source",
         }

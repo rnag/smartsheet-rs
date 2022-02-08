@@ -6,7 +6,7 @@ use std::io::{Error, ErrorKind};
 use std::time::Instant;
 
 use smartsheet_rs;
-use smartsheet_rs::models::Column;
+use smartsheet_rs::models::{Column, ColumnIncludeFlags, Level};
 
 use log::error;
 use tabled::{Alignment, Footer, Header, Modify, Row, Style, TableIteratorExt, Tabled};
@@ -31,7 +31,7 @@ async fn fetch_args() -> Result<u64> {
     match env::args().nth(1) {
         Some(sheet_id) => Ok(sheet_id.parse::<u64>()?),
         None => {
-            let error_msg = "Usage: columns <sheet_id>";
+            let error_msg = "Usage: columns_with_level <sheet_id>";
             error!("{}", error_msg);
             Err(Box::new(Error::new(ErrorKind::InvalidInput, error_msg)))
         }
@@ -48,9 +48,18 @@ async fn main() -> Result<()> {
 
     let start = Instant::now();
 
-    let result = smart.list_columns(sheet_id).await?;
+    let target_level = Level::MultiPicklist;
+    let include = Some(vec![ColumnIncludeFlags::Filters]);
+    let include_all = Some(true);
 
-    println!("List Columns completed in {:.2?}", start.elapsed());
+    let result = smart
+        .list_columns_with_params(sheet_id, Some(target_level), include, include_all)
+        .await?;
+
+    println!(
+        "List Columns with Level completed in {:.2?}",
+        start.elapsed()
+    );
     println!();
 
     println!("Column Count: {}", result.total_count);

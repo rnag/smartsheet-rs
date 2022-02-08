@@ -1,8 +1,9 @@
 use crate::models::{Attachment, Cell, Column, Discussion, User};
+use crate::types::Result;
 
 use core::option::Option;
-use core::option::Option::{None, Some};
 use serde::{Deserialize, Serialize};
+use std::io::{Error, ErrorKind};
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Row {
@@ -38,12 +39,15 @@ pub struct Row {
 
 impl Row {
     /// Retrieve a specified `Cell` - for a given *column id* - from the `Row`
-    pub fn get_cell_by_id(&self, column_id: u64) -> Option<&Cell> {
+    pub fn get_cell_by_id(&self, column_id: u64) -> Result<&Cell> {
         for cell in &self.cells {
             if cell.column_id == column_id {
-                return Some(cell);
+                return Ok(cell);
             }
         }
-        None
+        Err(Box::from(Error::new(
+            ErrorKind::NotFound,
+            "No cell found for the given Column ID or Name",
+        )))
     }
 }

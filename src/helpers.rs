@@ -1,9 +1,10 @@
-/// Public helper utilities
-///
+///! Public helper utilities
+///!
 use crate::models::{Cell, Column, Row};
+use crate::types::Result;
 
-use core::option::Option;
 use std::collections::HashMap;
+use std::io::{Error, ErrorKind};
 
 /// Define type aliases for the column mappings so that we can DRY.
 type ColumnNameToId<'a> = HashMap<&'a str, u64>;
@@ -27,7 +28,7 @@ pub struct ColumnMapper<'a> {
 
 impl<'a> ColumnMapper<'a> {
     /// Create a new `ColumnMapper` object from a list of `columns`.
-    pub fn new(columns: &'a Vec<Column>) -> Self {
+    pub fn new(columns: &'a [Column]) -> Self {
         let (name_to_id, id_to_name) = Self::get_mappings(columns);
 
         Self {
@@ -37,7 +38,7 @@ impl<'a> ColumnMapper<'a> {
     }
 
     /// Retrieve the `name` <-> `id` mappings for *columns* in a sheet.
-    fn get_mappings(columns: &'a Vec<Column>) -> (ColumnNameToId, ColumnIdToName) {
+    fn get_mappings(columns: &'a [Column]) -> (ColumnNameToId, ColumnIdToName) {
         let num_columns = columns.len();
         if num_columns == 0 {
             // TODO maybe don't panic
@@ -68,10 +69,15 @@ pub struct CellGetter<'a> {
 
 impl<'a> CellGetter<'a> {
     /// Create a new `CellGetter` from a reference to a `ColumnMapper` object
-    pub fn from_mapper(columns: &'a ColumnMapper<'a>) -> Self {
+    pub fn new(columns: &'a ColumnMapper<'a>) -> Self {
         Self {
             column_name_to_id: &columns.name_to_id,
         }
+    }
+
+    /// Create a new `CellGetter` from a reference to a `ColumnMapper` object
+    pub fn from_mapper(columns: &'a ColumnMapper<'a>) -> Self {
+        Self::new(columns)
     }
 
     /// Create a new `CellGetter` from a reference to a mapping of *column name*
@@ -81,16 +87,18 @@ impl<'a> CellGetter<'a> {
     }
 
     /// Find a `cell` in a `row` by its *column name*.
-    pub fn by_name<'b>(&'a self, row: &'a Row, name: &'b str) -> Option<&Cell> {
-        if let Some(&col_id) = self.column_name_to_id.get(name) {
-            row.get_cell_by_id(col_id)
-        } else {
-            None
+    pub fn by_name<'b>(&'a self, row: &'a Row, name: &'b str) -> Result<&Cell> {
+        match self.column_name_to_id.get(name) {
+            Some(&col_id) => row.get_cell_by_id(col_id),
+            None => Err(Box::from(Error::new(
+                ErrorKind::InvalidInput,
+                format!("A column named `{}` was not found in the Sheet", name),
+            ))),
         }
     }
 
     /// Find a `cell` in a `row` by its *column id*.
-    pub fn by_id(&'a self, row: &'a Row, column_id: u64) -> Option<&Cell> {
+    pub fn by_id(&'a self, row: &'a Row, column_id: u64) -> Result<&Cell> {
         row.get_cell_by_id(column_id)
     }
 }

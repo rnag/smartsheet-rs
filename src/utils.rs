@@ -1,5 +1,5 @@
-/// Library-specific utilities, mainly for internal use.
-///
+///! Library-specific utilities, mainly for internal use.
+///!
 use crate::types::Result;
 
 use std::io::{BufReader, Read};

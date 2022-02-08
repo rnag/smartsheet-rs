@@ -1,5 +1,5 @@
-/// Library-specific models for interacting with the Smartsheet API.
-///
+///! Library-specific models for interacting with the Smartsheet API.
+///!
 mod cell;
 mod column;
 mod error;

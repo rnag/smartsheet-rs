@@ -1,5 +1,5 @@
-/// Smartsheet API v2 implementation in Rust
-///
+///! Smartsheet API v2 implementation in Rust
+///!
 use crate::auth::auth_token;
 use crate::builders::ParamBuilder;
 use crate::constants::{API_ENDPOINT, ENV_VAR_NAME};
@@ -15,7 +15,7 @@ use hyper::client::HttpConnector;
 use hyper::header::AUTHORIZATION;
 use hyper::{Body, Client, Request};
 use hyper_tls::HttpsConnector;
-use log::debug;
+use log::{debug, warn};
 
 /// Client implementation for making requests to the *Smartsheet
 /// API v2*
@@ -81,7 +81,7 @@ impl<'a> SmartsheetApi<'a> {
     /// - https://smartsheet-platform.github.io/api-docs/#list-sheets
     ///
     pub async fn list_sheets(&self) -> Result<IndexResult<Sheet>> {
-        self.list_sheets_with_params(None).await
+        self.list_sheets_with_params(None, None, None).await
     }
 
     /// **List Sheets** - Gets a list of all sheets that the user has access
@@ -91,6 +91,10 @@ impl<'a> SmartsheetApi<'a> {
     /// # Arguments
     ///
     /// * `include` - A comma-separated list of elements to include in the response.
+    /// * `include_all` - If true, include all results (i.e. do not paginate).
+    /// * `modified_since` - Return sheets modified since a provided datetime.
+    ///                      Date should be in ISO-8601 format, for example,
+    ///                      `2020-01-30T13:25:32-07:00`.
     ///
     /// # Docs
     /// - https://smartsheet-platform.github.io/api-docs/#list-sheets
@@ -98,11 +102,17 @@ impl<'a> SmartsheetApi<'a> {
     pub async fn list_sheets_with_params(
         &self,
         include: Option<Vec<ListSheetIncludeFlags>>,
+        include_all: Option<bool>,
+        modified_since: Option<&'a str>, // TODO change this to a date type maybe
     ) -> Result<IndexResult<Sheet>> {
         let mut url = format!("{}/{}", self.endpoint, "sheets");
 
         let mut params = ParamBuilder::new();
+
         params.insert_comma_separated_values("include", include);
+        params.insert_value("includeAll", include_all);
+        params.insert_value("modifiedSince", modified_since);
+
         params.add_query_to_url(&mut url);
 
         debug!("URL: {}", url);
@@ -136,7 +146,8 @@ impl<'a> SmartsheetApi<'a> {
     /// - https://smartsheet-platform.github.io/api-docs/#row-include-flags
     ///
     pub async fn get_sheet(&self, sheet_id: u64) -> Result<Sheet> {
-        self.get_sheet_with_params(sheet_id, None, None).await
+        self.get_sheet_with_params(sheet_id, None, None, None, None, None, None)
+            .await
     }
 
     /// **Get Sheet** - Retrieves the specified sheet, with included
@@ -148,6 +159,18 @@ impl<'a> SmartsheetApi<'a> {
     /// * `sheet_id` - The Smartsheet to retrieve the rows and data for.
     /// * `include` - A comma-separated list of elements to include in the response.
     /// * `exclude` - A comma-separated list of elements to _not_ include in the response.
+    /// * `row_ids` - A comma-separated list of Row IDs on which to filter the
+    ///               rows included in the result.
+    /// * `row_numbers` - A comma-separated list of Row numbers on which to
+    ///                   filter the rows included in the result. Non-existent
+    ///                   row numbers are ignored.
+    /// * `column_ids` - A comma-separated comma-separated list of Column IDs.
+    ///                  The response will contain only the specified columns
+    ///                  in the 'columns' array, and individual rows' 'cells'
+    ///                  array will only contain cells in the specified columns.
+    /// * `rows_modified_since` - Return rows modified since a provided datetime.
+    ///                           Date should be in ISO-8601 format, for example,
+    ///                           `2020-01-30T13:25:32-07:00`.
     ///
     /// # Docs
     /// - https://smartsheet-platform.github.io/api-docs/#get-sheet
@@ -158,6 +181,10 @@ impl<'a> SmartsheetApi<'a> {
         sheet_id: u64,
         include: Option<Vec<SheetIncludeFlags>>,
         exclude: Option<Vec<SheetExcludeFlags>>,
+        row_ids: Option<Vec<u64>>,
+        row_numbers: Option<Vec<u64>>,
+        column_ids: Option<Vec<u64>>,
+        rows_modified_since: Option<&'a str>, // TODO change this to a date type maybe
     ) -> Result<Sheet> {
         let mut url = format!("{}/{}/{}", self.endpoint, "sheets", sheet_id);
 
@@ -165,6 +192,10 @@ impl<'a> SmartsheetApi<'a> {
 
         params.insert_comma_separated_values("include", include);
         params.insert_comma_separated_values("exclude", exclude);
+        params.insert_comma_separated_values("rowIds", row_ids);
+        params.insert_comma_separated_values("rowNumbers", row_numbers);
+        params.insert_comma_separated_values("columnIds", column_ids);
+        params.insert_value("rowsModifiedSince", rows_modified_since);
 
         params.add_query_to_url(&mut url);
 
@@ -237,8 +268,8 @@ impl<'a> SmartsheetApi<'a> {
     /// * `row_id` - The specified row to retrieve.
     /// * `include` - A comma-separated list of elements to include in the response.
     /// * `exclude` - A comma-separated list of elements to _not_ include in the response.
-    /// * `level` - Specifies whether multi-contact data is returned in a backwards-compatible,
-    /// text format, or as multi-contact data.
+    /// * `level` - Specifies whether multi-contact data is returned in a
+    ///             backwards-compatible, text format, or as multi-contact data.
     ///
     /// # Docs
     /// - https://smartsheet-platform.github.io/api-docs/#get-row
@@ -290,31 +321,38 @@ impl<'a> SmartsheetApi<'a> {
     /// - https://smartsheet-platform.github.io/api-docs/#list-columns
     ///
     pub async fn list_columns(&self, sheet_id: u64) -> Result<IndexResult<Column>> {
-        self.list_columns_with_level(sheet_id, None).await
+        self.list_columns_with_params(sheet_id, None, None, None)
+            .await
     }
 
-    /// **List Columns** - Gets a list of all columns belonging to the specified sheet.
+    /// **List Columns** - Gets a list of all columns belonging to the
+    /// specified sheet, with included _query parameters_.
     ///
     /// # Arguments
     ///
-    /// * `level` - Specifies whether multi-contact data is returned in a backwards-compatible,
-    /// text format, or as multi-contact data.
+    /// * `sheet_id` - The Smartsheet to retrieve the columns from.
+    /// * `level` - Specifies whether multi-contact data is returned in a
+    ///             backwards-compatible, text format, or as multi-contact data.
+    /// * `include` - A comma-separated list of elements to include in the response.
+    /// * `include_all` - If true, include all results (i.e. do not paginate).
     ///
     /// # Docs
     /// - https://smartsheet-platform.github.io/api-docs/#list-columns
     ///
-    pub async fn list_columns_with_level(
+    pub async fn list_columns_with_params(
         &self,
         sheet_id: u64,
         level: Option<Level>,
+        include: Option<Vec<ColumnIncludeFlags>>,
+        include_all: Option<bool>,
     ) -> Result<IndexResult<Column>> {
         let mut url = format!("{}/{}/{}/{}", self.endpoint, "sheets", sheet_id, "columns");
 
-        if level.is_some() {
-            let mut params = ParamBuilder::new();
-            params.insert_value("level", level);
-            params.add_query_to_url(&mut url);
-        }
+        let mut params = ParamBuilder::new();
+        params.insert_value("level", level);
+        params.insert_comma_separated_values("include", include);
+        params.insert_value("includeAll", include_all);
+        params.add_query_to_url(&mut url);
 
         debug!("URL: {}", url);
 
@@ -332,5 +370,161 @@ impl<'a> SmartsheetApi<'a> {
         debug!("Deserialize: {:?}", start.elapsed());
 
         Ok(columns)
+    }
+
+    /// **Get Column** - Retrieves a column by *id* from the specified sheet.
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to retrieve the column for.
+    /// * `column_id` - The Column Id to retrieve the data for.
+    ///
+    /// # Docs
+    /// - https://smartsheet-platform.github.io/api-docs/#get-column
+    ///
+    pub async fn get_column(&self, sheet_id: u64, column_id: u64) -> Result<Column> {
+        self.get_column_with_params(sheet_id, column_id, None, None)
+            .await
+    }
+
+    /// **Get Column** - Retrieves a column by *id* from the specified sheet,
+    /// with included _query parameters_.
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to retrieve the column for.
+    /// * `column_id` - The Column Id to retrieve the data for.
+    /// * `level` - Specifies whether multi-contact data is returned in a
+    ///             backwards-compatible, text format, or as multi-contact data.
+    /// * `include` - A comma-separated list of elements to include in the response.
+    ///
+    /// # Docs
+    /// - https://smartsheet-platform.github.io/api-docs/#get-column
+    ///
+    pub async fn get_column_with_params(
+        &self,
+        sheet_id: u64,
+        column_id: u64,
+        level: Option<Level>,
+        include: Option<Vec<ColumnIncludeFlags>>,
+    ) -> Result<Column> {
+        let mut url = format!(
+            "{}/{}/{}/{}/{}",
+            self.endpoint, "sheets", sheet_id, "columns", column_id
+        );
+
+        let mut params = ParamBuilder::new();
+
+        params.insert_value("level", level);
+        params.insert_comma_separated_values("include", include);
+
+        params.add_query_to_url(&mut url);
+
+        debug!("URL: {}", url);
+
+        let req = Request::get(&url)
+            .header(AUTHORIZATION, &self.bearer_token)
+            .body(Body::empty())?;
+
+        let mut res = self.client.request(req).await?;
+        raise_for_status(url, &mut res).await?;
+
+        let start = Instant::now();
+
+        let column = into_struct_from_slice(res).await?;
+
+        debug!("Deserialize: {:?}", start.elapsed());
+
+        Ok(column)
+    }
+
+    /// **Get Sheet By Name** - Convenience function to retrieve a specified
+    /// sheet by name. Used for those times when you don't know the Sheet Id.
+    ///
+    /// This will internally call `list_sheets` and then filter the response
+    /// data by the sheet name. It returns the first matching name.
+    ///
+    /// Returns the sheet, including rows, and optionally populated with
+    /// discussion and attachment objects.
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_name` - The name of the Smartsheet to filter results by.
+    ///
+    #[deprecated(
+        since = "0.2.0",
+        note = "please cache the sheet id and use `get_sheet` instead"
+    )]
+    pub async fn get_sheet_by_name(&self, sheet_name: &'a str) -> Result<Sheet> {
+        // Display a warning that the usage of this method is not recommended
+        warn!(
+            "{}",
+            "Calling `get_sheet_by_name()` is not recommended; it's \
+                preferable to cache the sheet ID and call \
+                `get_sheet()` instead."
+        );
+
+        // Get a fresh list of sheets
+        let result = self.list_sheets_with_params(None, Some(true), None).await?;
+
+        // Find the sheet by the provided name
+        for sheet in result.data {
+            if sheet.name == sheet_name {
+                return Ok(sheet);
+            }
+        }
+
+        Err(Box::from(Error::new(
+            ErrorKind::NotFound,
+            format!("The provided sheet `{}` was not found", sheet_name),
+        )))
+    }
+
+    /// **Get Column By Title** - Convenience function to retrieve a specified
+    /// column by title (name). Used for those times when you don't know the
+    /// Column Id.
+    ///
+    /// This will internally call `list_columns` and then filter the response
+    /// data by the column title. It returns the first matching name.
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to retrieve the column from.
+    /// * `column_title` - The name of the column to filter results by.
+    ///
+    ///
+    #[deprecated(
+        since = "0.2.0",
+        note = "please cache the column id and use `get_column` instead"
+    )]
+    pub async fn get_column_by_title(
+        &self,
+        sheet_id: u64,
+        column_title: &'a str,
+    ) -> Result<Column> {
+        // Display a warning that the usage of this method is not recommended
+        warn!(
+            "{}",
+            "Calling `get_column_by_title()` is not recommended; it's \
+                preferable to cache the column ID and call \
+                `get_column()` instead."
+        );
+
+        // Get a fresh list of columns
+        let result = self
+            .list_columns_with_params(sheet_id, None, None, Some(true))
+            .await?;
+
+        // Find the column by the provided name
+        for column in result.data {
+            if column.title == column_title {
+                return Ok(column);
+            }
+        }
+
+        Err(Box::from(Error::new(
+            ErrorKind::NotFound,
+            format!("The provided column `{}` was not found", column_title),
+        )))
     }
 }

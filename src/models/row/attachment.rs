@@ -10,9 +10,9 @@ pub struct Attachment {
     #[serde(rename = "createdBy")]
     pub created_by: User,
     pub id: u64,
-    #[serde(rename = "mimeType")]
-    pub mime_type: String,
     pub name: String,
+    #[serde(rename = "mimeType")]
+    pub mime_type: Option<String>,
     #[serde(rename = "sizeInKb")]
-    pub size_in_kb: u64,
+    pub size_in_kb: Option<u64>,
 }
