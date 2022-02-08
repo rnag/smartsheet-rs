@@ -82,5 +82,5 @@ a library. Why use the best library ever if it has no documentation?
 
 With that in mind, `smartsheet-rs` strives to document every aspect of it in order to make it
 easier for the user. In particular, it would be a great help to write out clear documentation
-and - for example - annotate the parameters and their definitions for each newly implemented
+and - for example - annotate the parameters and their sample usage for each newly implemented
 function or method.
