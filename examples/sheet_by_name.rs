@@ -1,4 +1,5 @@
 #![deny(warnings)]
+#![allow(deprecated)]
 #![warn(rust_2018_idioms)]
 
 use log::error;
@@ -13,12 +14,12 @@ use smartsheet_rs::{CellGetter, ColumnMapper};
 // A simple type alias so as to DRY.
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
-async fn fetch_args() -> Result<u64> {
+async fn fetch_args() -> Result<String> {
     // Some simple CLI args requirements...
     match env::args().nth(1) {
-        Some(sheet_id) => Ok(sheet_id.parse::<u64>()?),
+        Some(sheet_name) => Ok(sheet_name),
         None => {
-            let error_msg = "Usage: sheet <sheet_id>";
+            let error_msg = "Usage: sheet_by_name <sheet_name>";
             error!("{}", error_msg);
             Err(Box::new(Error::new(ErrorKind::InvalidInput, error_msg)))
         }
@@ -29,15 +30,15 @@ async fn fetch_args() -> Result<u64> {
 async fn main() -> Result<()> {
     pretty_env_logger::init();
 
-    let sheet_id = fetch_args().await?;
+    let sheet_name = fetch_args().await?;
 
     let smart = smartsheet_rs::SmartsheetApi::from_env()?;
 
     let start = Instant::now();
 
-    let sheet = smart.get_sheet(sheet_id).await?;
+    let sheet = smart.get_sheet_by_name(&sheet_name).await?;
 
-    println!("Get Sheet completed in {:.2?}", start.elapsed());
+    println!("Get Sheet By Name completed in {:.2?}", start.elapsed());
     println!();
 
     // Print out some basic info about the sheet

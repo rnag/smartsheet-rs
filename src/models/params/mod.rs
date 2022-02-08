@@ -1,8 +1,10 @@
+mod get_column;
 mod get_row;
 mod get_sheet;
 mod level;
 mod list_sheets;
 
+pub use self::get_column::*;
 pub use self::get_row::*;
 pub use self::get_sheet::*;
 pub use self::level::*;

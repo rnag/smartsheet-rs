@@ -6,7 +6,7 @@ use std::io::{Error, ErrorKind};
 use std::time::Instant;
 
 use smartsheet_rs;
-use smartsheet_rs::models::{Column, Level};
+use smartsheet_rs::models::{Column, ColumnIncludeFlags, Level};
 
 use log::error;
 use tabled::{Alignment, Footer, Header, Modify, Row, Style, TableIteratorExt, Tabled};
@@ -49,10 +49,11 @@ async fn main() -> Result<()> {
     let start = Instant::now();
 
     let target_level = Level::MultiPicklist;
+    let include = Some(vec![ColumnIncludeFlags::Filters]);
     let include_all = Some(true);
 
     let result = smart
-        .list_columns_with_params(sheet_id, Some(target_level), include_all)
+        .list_columns_with_params(sheet_id, Some(target_level), include, include_all)
         .await?;
 
     println!(

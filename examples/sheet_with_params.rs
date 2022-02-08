@@ -101,6 +101,7 @@ async fn main() -> Result<()> {
 }
 
 /// For each cell in the row, print out columns name and cell values
+// noinspection DuplicatedCode
 #[allow(dead_code)]
 async fn print_column_names_and_cell_values(row: Option<&Row>, cols: &Vec<Column>) -> Result<()> {
     if row.is_none() {
