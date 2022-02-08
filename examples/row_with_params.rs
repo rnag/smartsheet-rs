@@ -1,7 +1,6 @@
 #![deny(warnings)]
 #![warn(rust_2018_idioms)]
 
-use log::error;
 use std::env;
 use std::io::{Error, ErrorKind};
 use std::time::Instant;
@@ -10,9 +9,27 @@ use smartsheet_rs;
 use smartsheet_rs::models::{Level, Row, RowExcludeFlags, RowIncludeFlags};
 use smartsheet_rs::{CellGetter, ColumnMapper};
 
+use log::error;
+use tabled::{Header, Style, TableIteratorExt, Tabled};
+
 /// A simple type alias so as to DRY.
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
+#[derive(Tabled)]
+struct TableRow<'a> {
+    #[header("Row ID")]
+    row_id: u64,
+    #[header("Row #")]
+    row_number: u64,
+    #[header("Version")]
+    version: u64,
+    #[header("Created By")]
+    created_by: &'a str,
+    #[header("Created By (Email)")]
+    created_by_email: &'a str,
+}
+
+// noinspection DuplicatedCode
 async fn fetch_single_arg(arg_pos: usize) -> Result<u64> {
     // Some simple CLI args requirements...
     match env::args().nth(arg_pos) {
@@ -67,13 +84,28 @@ async fn main() -> Result<()> {
         .get_row_with_params(sheet_id, row_id, Some(include), Some(exclude), Some(level))
         .await?;
 
-    println!("Get Row with Params completed in {:?}", start.elapsed());
+    println!("Get Row with Params completed in {:.2?}", start.elapsed());
     println!();
 
+    let created_at = row.created_by.as_ref().unwrap();
+
     // Print out some basic info about the row
-    println!("Row ID:     {}", row.id);
-    println!("Row Number: {}", row.row_number);
-    println!("Created At: {}", row.created_at);
+
+    let tr = TableRow {
+        row_id: row.id,
+        row_number: row.row_number,
+        version: row.version.unwrap(),
+        created_by: created_at.name.as_ref().unwrap(),
+        created_by_email: created_at.email.as_ref(),
+    };
+
+    println!(
+        "{}",
+        [tr].table()
+            .with(Style::PSEUDO_CLEAN)
+            // .with(Modify::new(Row(1..)).with(Alignment::left()))
+            .with(Header("Row Info"))
+    );
 
     // Assert desired row properties are populated in the response
     assert!(
@@ -84,10 +116,17 @@ async fn main() -> Result<()> {
         row.attachments.is_some(),
         "Expected `attachments` to be populated"
     );
+    assert!(
+        row.created_by.is_some(),
+        "Expected `created_by` to be populated"
+    );
 
-    println!("Permalink:  {}", row.permalink.as_ref().unwrap());
+    // Print out additional fields in response
+    println!("[ Permalink ]");
+    println!("{}", row.permalink.as_ref().unwrap());
+    println!("[ Attachments ]");
     if let Some(attachments) = &row.attachments {
-        println!("Attachments: {:#?}", attachments);
+        println!("{:#?}", attachments);
     }
 
     // Create `name` <-> `id` mappings for columns in the row
@@ -103,6 +142,7 @@ async fn main() -> Result<()> {
 }
 
 /// For each cell in the row, print out columns name and cell values
+// noinspection DuplicatedCode
 #[allow(dead_code)]
 async fn print_column_names_and_cell_values<'a>(
     row: &Row,
