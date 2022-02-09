@@ -3,6 +3,7 @@
 use crate::auth::auth_token;
 use crate::builders::ParamBuilder;
 use crate::constants::{API_ENDPOINT, ENV_VAR_NAME};
+use crate::https::{get_connector, tls};
 use crate::models::*;
 use crate::status::raise_for_status;
 use crate::types::Result;
@@ -14,10 +15,7 @@ use std::time::Instant;
 use hyper::client::HttpConnector;
 use hyper::header::AUTHORIZATION;
 use hyper::{Body, Client, Request};
-// use hyper_tls::HttpsConnector;
-// use hyper_rustls::ConfigBuilderExt;
-use hyper_rustls::{ConfigBuilderExt, HttpsConnector};
-use log::{debug, error, warn};
+use log::{debug, warn};
 
 /// Client implementation for making requests to the *Smartsheet
 /// API v2*
@@ -28,7 +26,7 @@ use log::{debug, error, warn};
 ///
 pub struct SmartsheetApi<'a> {
     bearer_token: String,
-    client: Client<HttpsConnector<HttpConnector>>,
+    client: Client<tls::HttpsConnector<HttpConnector>>,
     endpoint: &'a str,
 }
 
@@ -65,22 +63,8 @@ impl<'a> SmartsheetApi<'a> {
     fn new(endpoint: &'a str, token: &str) -> Self {
         let bearer_token = auth_token(token);
 
-        let tls = rustls::ClientConfig::builder()
-            .with_safe_defaults()
-            .with_native_roots()
-            .with_no_client_auth();
-
-        // Prepare the HTTPS connector
-        let https = hyper_rustls::HttpsConnectorBuilder::new()
-            // .with_native_roots()
-            .with_tls_config(tls)
-            .https_only()
-            // .https_or_http()
-            .enable_http2()
-            // .enable_http1()
-            .build();
-
-        let client = Client::builder().build::<_, hyper::Body>(https);
+        let https_connector = get_connector();
+        let client = Client::builder().build::<_, hyper::Body>(https_connector);
 
         Self {
             bearer_token,

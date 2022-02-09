@@ -22,7 +22,7 @@ rust-tls = ["hyper-rustls", "rustls"]
 native-tls = ["hyper-tls"]
 
 [dependencies]
-hyper = { version = "0.14.16" ,features = ["runtime", "client", "http2", "tcp"] }
+hyper = { version = "0.14.16" ,features = ["runtime", "client", "http1", "tcp"] }
 hyper-rustls = { version = "0.23.0", optional = true, default-dependencies = false, features=["native-tokio", "tls12", "http2"] }
 # hyper-rustls = { version = "0.23.0", optional = true, default-dependencies = false }
 rustls = { version = "0.20.1", optional = true, default-features = false }

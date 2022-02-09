@@ -60,6 +60,7 @@ pub mod auth;
 pub mod builders;
 pub mod constants;
 pub mod helpers;
+mod https;
 pub mod models;
 pub mod status;
 pub mod types;
