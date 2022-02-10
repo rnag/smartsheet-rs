@@ -131,9 +131,10 @@ to keep the overall size small. This crate uses [`hyper`][] and [`hyper-rustls`]
 internally, to make HTTPS requests to the Smartsheet API.
 
 While `hyper-rustls` was chosen as the default TLS implementation
-because it works without issue when compiling for the **x86_64-unknown-linux-musl**
-target as is common for [AWS Lambda][] deployments, it is still possible to
-instead use the native [`hyper-tls`][] implementation, which relies on OpenSSL.
+because it works without issue when cross-compiling for the
+**x86_64-unknown-linux-musl** target as is common for [AWS Lambda][]
+deployments, it is still possible to instead use the native [`hyper-tls`][]
+implementation, which relies on OpenSSL.
 
 To do this, disable the default "rust-tls" feature and enable the "native-tls" feature:
 
