@@ -134,9 +134,9 @@ it might be a better idea to first build out a mapping of each *column name* to 
 for this purpose, as shown below.
 
 ```rust
-let col_name_to_cell = get_cell.name_to_cell(row);
+let column_name_to_cell = get_cell.name_to_cell(row);
 
-println!("{:#?}", col_name_to_cell);
+println!("{:#?}", column_name_to_cell);
 // Prints:
 // {
 //     "Column 1": Cell {...},
