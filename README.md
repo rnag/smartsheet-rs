@@ -139,7 +139,7 @@ To do this, disable the default "rust-tls" feature and enable the "native-tls" f
 
 ```toml
 [dependencies]
-smartsheet-rs = { version = "0.2", default-features = false, features = ["native-tls"] }
+smartsheet-rs = { version = "0.2", default-features = false, features = ["native-tls", "logging", "serde-std"] }
 ```
 
 [`hyper`]: https://docs.rs/hyper
