@@ -11,6 +11,25 @@ Possible header types:
 
 ## [Unreleased]
 
+## v0.3.0 (2022-02-10)
+
+### Features
+
+- Trim down and refactor on the project dependencies.
+- Make `hyper-rustls` the default TLS implementation, instead of `hyper-tls`. This should
+  work out better for Linux deployments, for example on [AWS Lambda].
+- Add optional and default features.
+- Make the library logging opt-in.
+- Add an implementation for `CellGetter::name_to_cell` method.
+- Refactor `ParamBuilder` usage so it conforms a little better to best practices in Rust.
+
+[AWS Lambda]: https://docs.aws.amazon.com/sdk-for-rust/latest/dg/lambda.html
+
+### Breaking Changes
+
+- Comment out the `CellGetter::from_name_to_id` method, since I was fighting
+   too long with the Rust compiler to make it work. I unfortunately ended up losing the battle there.
+
 ## v0.2.0 (2022-02-08)
 
 ### Features

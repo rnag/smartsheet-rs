@@ -43,7 +43,7 @@ pub(crate) fn get_https_client() -> Client<tls::HttpsConnector<HttpConnector>> {
     let mut builder = Client::builder();
     builder.http2_only(true);
 
-    return builder.build::<_, hyper::Body>(https_connector);
+    builder.build::<_, hyper::Body>(https_connector)
 }
 
 #[cfg(all(feature = "rust-tls", not(feature = "http2")))]
@@ -61,12 +61,12 @@ pub(crate) fn get_https_client() -> Client<tls::HttpsConnector<HttpConnector>> {
         .enable_http2()
         .build();
 
-    return Client::builder().build::<_, hyper::Body>(https_connector);
+    Client::builder().build::<_, hyper::Body>(https_connector)
 }
 
 #[cfg(not(feature = "rust-tls"))]
 pub(crate) fn get_https_client() -> Client<tls::HttpsConnector<HttpConnector>> {
     // Prepare the HTTPS connector
     let https_connector = tls::HttpsConnector::new();
-    return Client::builder().build::<_, hyper::Body>(https_connector);
+    Client::builder().build::<_, hyper::Body>(https_connector)
 }

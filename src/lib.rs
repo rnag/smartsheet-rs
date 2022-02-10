@@ -44,6 +44,14 @@
 //! You can check out sample usage of these API methods in the [examples/](https://github.com/rnag/smartsheet-rs/tree/main/examples)
 //! folder in the project repo on GitHub.
 //!
+//! ## A Larger Example
+//!
+//! This section contains more examples of usage. You can find it in the readme documentation on the
+//! [crates.io] page, or alternatively in the [`README.md`] file on the GitHub project repo.
+//!
+//! [crates.io]: https://crates.io/crates/smartsheet-rs#a-larger-example
+//! [`README.md`]: https://github.com/rnag/smartsheet-rs#a-larger-example
+//!
 //! ## Dependencies and Features
 //!
 //! This library uses only the minimum required dependencies, in order
