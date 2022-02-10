@@ -129,7 +129,7 @@ and then returning the first `Cell` where the *column ID* for the cell
 matches the specified *column name*.
 
 If it's necessary to retrieve multiple `Cell` objects from a `Row` by their *column names*,
-it might be a better idea to first build a mapping of each *column name* to the
+it might be a better idea to first build out a mapping of each *column name* to the
 `Cell` object in the row for that column. The method `CellGetter::name_to_cell` can be used
 for this purpose, as shown below.
 
