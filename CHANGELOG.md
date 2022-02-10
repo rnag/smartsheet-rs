@@ -52,7 +52,7 @@ Possible header types:
 - Update few methods like `CellGetter.by_name` to return
   a `Result` instead of `Option`.
 
-## v0.1.0 (2022-01-01)
+## v0.1.0 (2022-02-06)
 
 - Initial Release on [crates.io][] :tada:
 
