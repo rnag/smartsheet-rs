@@ -47,10 +47,10 @@
 //!
 //! This library uses only the minimum required dependencies, in order
 //! to keep the overall size small. This crate uses [hyper][] and
-//! [hyper-tls][] internally, to make HTTPS requests to the Smartsheet API.
+//! [hyper-rustls][] internally, to make HTTPS requests to the Smartsheet API.
 //!
 //! [hyper]: https://docs.rs/hyper
-//! [hyper-tls]: https://docs.rs/hyper-tls
+//! [hyper-rustls]: https://docs.rs/hyper-rustls
 
 // #![warn(missing_docs)]
 
