@@ -16,7 +16,7 @@ this crate.
 * [Getting Started](#getting-started)
 * [Implemented Methods](#implemented-methods)
 * [A Larger Example](#a-larger-example)
-* [Dependencies](#dependencies)
+* [Dependencies and Features](#dependencies-and-features)
 * [Contributing](#contributing)
 * [License](#license)
 * [Authors](#authors)
@@ -35,7 +35,7 @@ Getting started with the `smartsheet-rs` library is easy:
 
    ```toml
    [dependencies]
-   smartsheet-rs = "0.2"
+   smartsheet-rs = "0.3"
    tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
    ```
 
@@ -124,14 +124,49 @@ async fn main() -> Result<()> {
 }
 ```
 
-## Dependencies
+The `CellGetter::by_name` method works by iterating over each cell in the row,
+and then returning the first `Cell` where the *column ID* for the cell
+matches the specified *column name*.
+
+If the need arises to retrieve *multiple* `Cell` objects from a `Row` by their column names,
+it might be a better idea to first build out a mapping of each *column name* to the
+`Cell` object in the row for that column. The method `CellGetter::name_to_cell` can be used
+for this purpose, as shown below.
+
+```rust
+let column_name_to_cell = get_cell.name_to_cell(row);
+
+println!("{:#?}", column_name_to_cell);
+// Prints:
+// {
+//     "Column 1": Cell {...},
+//     "Column 2": Cell {...},
+//      ...
+```
+
+## Dependencies and Features
 
 This library uses only the minimum required dependencies, in order
-to keep the overall size small. This crate uses [`hyper`][] and [`hyper-tls`][]
+to keep the overall size small. This crate uses [`hyper`][] and [`hyper-rustls`][]
 internally, to make HTTPS requests to the Smartsheet API.
 
+While `hyper-rustls` was chosen as the default TLS implementation
+because it works without issue when cross-compiling for the
+**x86_64-unknown-linux-musl** target as is common for [AWS Lambda][]
+deployments, it is still possible to instead use the native [`hyper-tls`][]
+implementation, which relies on OpenSSL.
+
+To do this, disable the default "rust-tls" feature and enable the "native-tls" feature:
+
+```toml
+[dependencies]
+smartsheet-rs = { version = "0.3", default-features = false, features = ["native-tls", "logging", "serde-std"] }
+```
+
 [`hyper`]: https://docs.rs/hyper
+[`hyper-rustls`]: https://docs.rs/hyper-rustls
 [`hyper-tls`]: https://docs.rs/hyper-tls
+[AWS Lambda]: https://docs.aws.amazon.com/sdk-for-rust/latest/dg/lambda.html
 
 ## Contributing
 

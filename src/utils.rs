@@ -1,5 +1,5 @@
-///! Library-specific utilities, mainly for internal use.
-///!
+//! Library-specific utilities, mainly for internal use.
+//!
 use crate::types::Result;
 
 use std::io::{BufReader, Read};
@@ -8,6 +8,7 @@ use hyper::body::Buf;
 use hyper::{Body, Response};
 use serde::de;
 
+#[cfg(feature = "serde-std")]
 pub async fn resp_into_struct<T>(resp: Response<Body>) -> Result<T>
 where
     T: de::DeserializeOwned,

@@ -1,4 +1,4 @@
-///! Authentication helper utilities
+//! Authentication helper utilities
 
 /// Returns the value to set in the `AUTHORIZATION` header for a request.
 pub fn auth_token(token: &str) -> String {

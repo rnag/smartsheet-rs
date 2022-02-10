@@ -1,12 +1,14 @@
-///! Smartsheet API v2 implementation in Rust
-///!
+//! Smartsheet API v2 implementation in Rust
+//!
 use crate::auth::auth_token;
 use crate::builders::ParamBuilder;
 use crate::constants::{API_ENDPOINT, ENV_VAR_NAME};
+use crate::https::{get_https_client, tls};
+use crate::log::{debug, warn};
 use crate::models::*;
 use crate::status::raise_for_status;
 use crate::types::Result;
-use crate::utils::{into_struct_from_slice, resp_into_struct};
+use crate::utils::*;
 
 use std::io::{Error, ErrorKind};
 use std::time::Instant;
@@ -14,8 +16,6 @@ use std::time::Instant;
 use hyper::client::HttpConnector;
 use hyper::header::AUTHORIZATION;
 use hyper::{Body, Client, Request};
-use hyper_tls::HttpsConnector;
-use log::{debug, warn};
 
 /// Client implementation for making requests to the *Smartsheet
 /// API v2*
@@ -26,7 +26,7 @@ use log::{debug, warn};
 ///
 pub struct SmartsheetApi<'a> {
     bearer_token: String,
-    client: Client<HttpsConnector<HttpConnector>>,
+    client: Client<tls::HttpsConnector<HttpConnector>>,
     endpoint: &'a str,
 }
 
@@ -62,9 +62,7 @@ impl<'a> SmartsheetApi<'a> {
     /// Constructor function, for internal use
     fn new(endpoint: &'a str, token: &str) -> Self {
         let bearer_token = auth_token(token);
-
-        let https = HttpsConnector::new();
-        let client = Client::builder().build::<_, hyper::Body>(https);
+        let client = get_https_client();
 
         Self {
             bearer_token,
@@ -107,13 +105,11 @@ impl<'a> SmartsheetApi<'a> {
     ) -> Result<IndexResult<Sheet>> {
         let mut url = format!("{}/{}", self.endpoint, "sheets");
 
-        let mut params = ParamBuilder::new();
-
-        params.insert_comma_separated_values("include", include);
-        params.insert_value("includeAll", include_all);
-        params.insert_value("modifiedSince", modified_since);
-
-        params.add_query_to_url(&mut url);
+        ParamBuilder::new(&mut url)
+            .with_comma_separated_values("include", include)
+            .with_value("includeAll", include_all)
+            .with_value("modifiedSince", modified_since)
+            .build();
 
         debug!("URL: {}", url);
 
@@ -188,16 +184,14 @@ impl<'a> SmartsheetApi<'a> {
     ) -> Result<Sheet> {
         let mut url = format!("{}/{}/{}", self.endpoint, "sheets", sheet_id);
 
-        let mut params = ParamBuilder::new();
-
-        params.insert_comma_separated_values("include", include);
-        params.insert_comma_separated_values("exclude", exclude);
-        params.insert_comma_separated_values("rowIds", row_ids);
-        params.insert_comma_separated_values("rowNumbers", row_numbers);
-        params.insert_comma_separated_values("columnIds", column_ids);
-        params.insert_value("rowsModifiedSince", rows_modified_since);
-
-        params.add_query_to_url(&mut url);
+        ParamBuilder::new(&mut url)
+            .with_comma_separated_values("include", include)
+            .with_comma_separated_values("exclude", exclude)
+            .with_comma_separated_values("rowIds", row_ids)
+            .with_comma_separated_values("rowNumbers", row_numbers)
+            .with_comma_separated_values("columnIds", column_ids)
+            .with_value("rowsModifiedSince", rows_modified_since)
+            .build();
 
         debug!("URL: {}", url);
 
@@ -212,16 +206,17 @@ impl<'a> SmartsheetApi<'a> {
 
         // Note: I've timed the different methods for converting response data
         // to a `struct` type, and found the buffered reader approach to work
-        // out the best for this approach. The response time seems to be quite
-        // stable where the reader implementation is used.
+        // slightly better on average (at least on a Mac OS)
 
         // 1. Bytes
-        // let sheet = into_struct_from_slice(res).await?;
+        #[cfg(feature = "serde-alloc")]
+        let sheet = into_struct_from_slice(res).await?;
 
         // 2. String
         // let sheet = into_struct_from_str(res).await?;
 
         // 3. (Buffered) Reader
+        #[cfg(not(feature = "serde-alloc"))]
         let sheet = resp_into_struct(res).await?;
 
         debug!("Deserialize: {:?}", start.elapsed());
@@ -288,13 +283,11 @@ impl<'a> SmartsheetApi<'a> {
             self.endpoint, "sheets", sheet_id, "rows", row_id
         );
 
-        let mut params = ParamBuilder::new();
-
-        params.insert_comma_separated_values("include", include);
-        params.insert_comma_separated_values("exclude", exclude);
-        params.insert_value("level", level);
-
-        params.add_query_to_url(&mut url);
+        ParamBuilder::new(&mut url)
+            .with_comma_separated_values("include", include)
+            .with_comma_separated_values("exclude", exclude)
+            .with_value("level", level)
+            .build();
 
         debug!("URL: {}", url);
 
@@ -348,11 +341,11 @@ impl<'a> SmartsheetApi<'a> {
     ) -> Result<IndexResult<Column>> {
         let mut url = format!("{}/{}/{}/{}", self.endpoint, "sheets", sheet_id, "columns");
 
-        let mut params = ParamBuilder::new();
-        params.insert_value("level", level);
-        params.insert_comma_separated_values("include", include);
-        params.insert_value("includeAll", include_all);
-        params.add_query_to_url(&mut url);
+        ParamBuilder::new(&mut url)
+            .with_value("level", level)
+            .with_comma_separated_values("include", include)
+            .with_value("includeAll", include_all)
+            .build();
 
         debug!("URL: {}", url);
 
@@ -413,12 +406,10 @@ impl<'a> SmartsheetApi<'a> {
             self.endpoint, "sheets", sheet_id, "columns", column_id
         );
 
-        let mut params = ParamBuilder::new();
-
-        params.insert_value("level", level);
-        params.insert_comma_separated_values("include", include);
-
-        params.add_query_to_url(&mut url);
+        ParamBuilder::new(&mut url)
+            .with_value("level", level)
+            .with_comma_separated_values("include", include)
+            .build();
 
         debug!("URL: {}", url);
 
