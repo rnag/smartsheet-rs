@@ -124,7 +124,7 @@ async fn main() -> Result<()> {
 }
 ```
 
-The `CellGetter::by_name` method works by iterating over each *cell* in the *row*,
+The `CellGetter::by_name` method works by iterating over each cell in the row,
 and then returning the first `Cell` where the *column ID* for the cell
 matches the specified *column name*.
 
