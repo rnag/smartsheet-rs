@@ -124,6 +124,26 @@ async fn main() -> Result<()> {
 }
 ```
 
+The `CellGetter::by_name` method works by iterating over each *cell* in the *row*,
+and then returning the first `Cell` where the *column ID* for the cell
+matches the specified *column name*.
+
+If it's necessary to retrieve multiple `Cell` objects from a `Row` by their *column names*,
+it might be a better idea to first build a mapping of each *column name* to the
+`Cell` object in the row for that column. The method `CellGetter::name_to_cell` can be used
+for this purpose, as shown below.
+
+```rust
+let col_name_to_cell = get_cell.name_to_cell(row);
+
+println!("{:#?}", col_name_to_cell);
+// Prints:
+// {
+//     "Column 1": Cell {...},
+//     "Column 2": Cell {...},
+//      ...
+```
+
 ## Dependencies and Features
 
 This library uses only the minimum required dependencies, in order
