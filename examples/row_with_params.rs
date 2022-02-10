@@ -132,6 +132,9 @@ async fn main() -> Result<()> {
     // Create a `CellGetter` helper to find cells in a row by `name`
     let _get_cell = CellGetter::new(&cols);
 
+    // Uncomment to display a mapping of column name to the cell for that column
+    // print_column_name_to_cell(&row, _get_cell).await?;
+
     // Uncomment to display the column name + values of each cell in the row
     // print_column_names_and_cell_values(&row, &cols, _get_cell).await?;
 
@@ -142,7 +145,7 @@ async fn main() -> Result<()> {
 // noinspection DuplicatedCode
 #[allow(dead_code)]
 async fn print_column_names_and_cell_values<'a>(
-    row: &Row,
+    row: &'a Row,
     cols: &ColumnMapper<'a>,
     get_cell: CellGetter<'a>,
 ) -> Result<()> {
@@ -185,6 +188,22 @@ async fn print_column_names_and_cell_values<'a>(
     }
 
     println!("Print cell values completed in {:?}", start.elapsed());
+
+    Ok(())
+}
+
+/// Print out a mapping of *column title* to the `Cell` object in that column
+// noinspection DuplicatedCode
+#[allow(dead_code)]
+async fn print_column_name_to_cell<'a>(row: &'a Row, get_cell: CellGetter<'a>) -> Result<()> {
+    let start = Instant::now();
+    let col_name_to_cell = get_cell.name_to_cell(row);
+    println!("Get cell mappings completed in {:?}", start.elapsed());
+
+    println!();
+    println!("Column Name to Cell");
+    println!("---");
+    println!("{:#?}", col_name_to_cell);
 
     Ok(())
 }

@@ -1,6 +1,7 @@
-///! Utilities to validate a response to ensure that its *status code*
-///! indicates that it is a success.
-///!
+//! Utilities to validate a response to ensure that its *status code*
+//! indicates that it is a success.
+//!
+use crate::log::error;
 use crate::models::{RequestError, SmartsheetError};
 use crate::types::Result;
 use crate::utils::resp_to_string;
@@ -64,7 +65,7 @@ pub async fn raise_for_status(request_url: String, resp: &mut Response<Body>) ->
         e.message = Some(resp_data.trim().to_string());
     }
 
-    log::error!("{:#?}", e);
+    error!("{:#?}", e);
 
     Err(Box::new(e))
 }
