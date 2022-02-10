@@ -16,6 +16,7 @@ use hyper::header::AUTHORIZATION;
 use hyper::{Body, Client, Request};
 use hyper_tls::HttpsConnector;
 use log::{debug, warn};
+use serde_json::Value;
 
 /// Client implementation for making requests to the *Smartsheet
 /// API v2*
@@ -301,6 +302,32 @@ impl<'a> SmartsheetApi<'a> {
         let req = Request::get(&url)
             .header(AUTHORIZATION, &self.bearer_token)
             .body(Body::empty())?;
+
+        let mut res = self.client.request(req).await?;
+        raise_for_status(url, &mut res).await?;
+
+        let start = Instant::now();
+
+        // asynchronously aggregate the chunks of the body
+        let row = into_struct_from_slice(res).await?;
+
+        debug!("Deserialize: {:?}", start.elapsed());
+
+        Ok(row)
+    }
+
+    pub async fn add_row(&self, sheet_id: u64, row: Row) -> Result<Value> {
+        let mut url: String = format!("{}/{}/{}/{}", self.endpoint, "sheets", sheet_id, "rows");
+
+        debug!("URL: {}", url);
+
+        let start = Instant::now();
+        let data = serde_json::to_vec(&row)?;
+        debug!("Deserialize 1: {:?}", start.elapsed());
+
+        let req = Request::post(&url)
+            .header(AUTHORIZATION, &self.bearer_token)
+            .body(Body::from(data))?;
 
         let mut res = self.client.request(req).await?;
         raise_for_status(url, &mut res).await?;

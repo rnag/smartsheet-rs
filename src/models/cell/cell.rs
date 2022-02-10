@@ -5,15 +5,17 @@ use core::fmt::Error;
 use core::option::Option;
 use core::option::Option::{None, Some};
 use core::result::Result::{Err, Ok};
-use serde::{Deserialize, Serialize};
+use serde::ser::SerializeStruct;
+use serde::{Deserialize, Serialize, Serializer};
 use serde_json::value::Value;
 use serde_json::Number;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Default, Debug, Clone, PartialEq, Deserialize)]
 pub struct Cell {
     #[serde(rename = "columnId")]
     pub column_id: u64,
     #[serde(rename = "columnType")]
+    // #[serde(skip_serializing)]
     pub column_type: Option<String>,
     /// Represents a hyperlink to a dashboard, report, sheet, or URL.
     ///
@@ -48,6 +50,7 @@ pub struct Cell {
     ///
     /// - https://smartsheet-platform.github.io/api-docs/#cell-reference
     #[serde(rename = "displayValue")]
+    // #[serde(skip_serializing)]
     pub display_value: Option<String>,
     /// `Cell.objectValue` is an object representation of a cell's value and
     /// is currently used for adding or updating predecessor cell values, or
@@ -57,9 +60,32 @@ pub struct Cell {
     ///
     /// - https://smartsheet-platform.github.io/api-docs/#cell-reference
     #[serde(rename = "objectValue")]
+    // #[serde(skip_serializing)]
     pub object_value: Option<Value>,
     pub format: Option<String>,
     pub formula: Option<String>,
+}
+
+impl Serialize for Cell {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Cell", 20)?;
+
+        let item_count = 0;
+        let mut has_link = false;
+        let mut has_obj_value = false;
+
+        let link1: &Hyperlink;
+
+        if let Some(link) = &self.hyperlink {
+            link1 = link;
+        }
+
+        state.serialize_field("columnId", &self.column_id)?;
+        state.end()
+    }
 }
 
 impl Cell {
