@@ -26,19 +26,17 @@ use tls::ConfigBuilderExt;
 
 #[cfg(feature = "rust-tls")]
 pub(crate) fn get_connector() -> tls::HttpsConnector<HttpConnector> {
-    let tls2 = ClientConfig::builder()
-        .with_safe_defaults()
-        .with_native_roots()
-        .with_no_client_auth();
-
     // Prepare the HTTPS connector
     tls::HttpsConnectorBuilder::new()
         // .with_native_roots()
-        .with_tls_config(tls2)
+        .with_tls_config(
+            ClientConfig::builder()
+                .with_safe_defaults()
+                .with_native_roots()
+                .with_no_client_auth(),
+        )
         .https_only()
-        // .https_or_http()
         .enable_http2()
-        // .enable_http1()
         .build()
 }
 
