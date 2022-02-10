@@ -24,7 +24,7 @@ serde_json = { version = "1.0.78", default-features = false }
 # Optional
 
 log = { version = "0.4.14", optional = true }
-hyper-rustls = { version = "0.23.0", optional = true, default-features = false, features = ["native-tokio", "http2", "tls12"] }
+hyper-rustls = { version = "0.23.0", optional = true, default-features = false, features = ["native-tokio", "tls12"] }
 rustls = { version = "0.20.1", optional = true, default-features = false }
 hyper-tls = { version = "0.5.0", optional = true }
 
@@ -53,7 +53,7 @@ default = ["rust-tls", "logging", "serde-std"]
 
 # The `rust-tls` feature here is ideal for Linux (AWS Lambda) environments.
 # NOTE: Disabling both `rust-tls` *and* `native-tls` features is not supported.
-rust-tls = ["http2", "hyper-rustls", "rustls"]
+rust-tls = ["hyper-rustls/http1", "hyper-rustls/http2", "hyper-rustls", "rustls"]
 
 # This feature enables useful log output from this library, such as request
 # URL and logging of elapsed durations; it is enabled by default.

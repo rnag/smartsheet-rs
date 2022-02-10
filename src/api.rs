@@ -3,7 +3,7 @@
 use crate::auth::auth_token;
 use crate::builders::ParamBuilder;
 use crate::constants::{API_ENDPOINT, ENV_VAR_NAME};
-use crate::https::{get_connector, tls};
+use crate::https::{get_https_client, tls};
 use crate::log::{debug, warn};
 use crate::models::*;
 use crate::status::raise_for_status;
@@ -62,9 +62,7 @@ impl<'a> SmartsheetApi<'a> {
     /// Constructor function, for internal use
     fn new(endpoint: &'a str, token: &str) -> Self {
         let bearer_token = auth_token(token);
-
-        let https_connector = get_connector();
-        let client = Client::builder().build::<_, hyper::Body>(https_connector);
+        let client = get_https_client();
 
         Self {
             bearer_token,
