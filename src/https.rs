@@ -17,7 +17,7 @@ use hyper::client::HttpConnector;
 
 #[cfg(feature = "rust-tls")]
 pub(crate) use hyper_rustls as tls;
-#[cfg(feature = "native-tls")]
+#[cfg(not(feature = "rust-tls"))]
 pub(crate) use hyper_tls as tls;
 #[cfg(feature = "rust-tls")]
 use rustls::ClientConfig;
@@ -40,7 +40,7 @@ pub(crate) fn get_connector() -> tls::HttpsConnector<HttpConnector> {
         .build()
 }
 
-#[cfg(feature = "native-tls")]
+#[cfg(not(feature = "rust-tls"))]
 pub(crate) fn get_connector() -> tls::HttpsConnector<HttpConnector> {
     tls::HttpsConnector::new()
 }
