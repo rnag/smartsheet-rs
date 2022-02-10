@@ -7,3 +7,8 @@ fn test_readme_deps() {
 fn test_html_root_url() {
     version_sync::assert_html_root_url_updated!("src/lib.rs");
 }
+
+// #[test]
+// fn test_src_lib_deps() {
+//     version_sync::assert_contains_substring!("src/lib.rs", "version = \"{version}\"");
+// }
