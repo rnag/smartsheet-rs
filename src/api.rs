@@ -222,8 +222,7 @@ impl<'a> SmartsheetApi<'a> {
         // let sheet = into_struct_from_str(res).await?;
 
         // 3. (Buffered) Reader
-        //noinspection RsBorrowChecker
-        #[cfg(feature = "serde-std")]
+        #[cfg(not(feature = "serde-alloc"))]
         let sheet = resp_into_struct(res).await?;
 
         debug!("Deserialize: {:?}", start.elapsed());
