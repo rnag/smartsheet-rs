@@ -107,13 +107,11 @@ impl<'a> SmartsheetApi<'a> {
     ) -> Result<IndexResult<Sheet>> {
         let mut url = format!("{}/{}", self.endpoint, "sheets");
 
-        let mut params = ParamBuilder::new();
-
-        params.insert_comma_separated_values("include", include);
-        params.insert_value("includeAll", include_all);
-        params.insert_value("modifiedSince", modified_since);
-
-        params.add_query_to_url(&mut url);
+        ParamBuilder::new(&mut url)
+            .with_comma_separated_values("include", include)
+            .with_value("includeAll", include_all)
+            .with_value("modifiedSince", modified_since)
+            .build();
 
         debug!("URL: {}", url);
 
@@ -188,16 +186,14 @@ impl<'a> SmartsheetApi<'a> {
     ) -> Result<Sheet> {
         let mut url = format!("{}/{}/{}", self.endpoint, "sheets", sheet_id);
 
-        let mut params = ParamBuilder::new();
-
-        params.insert_comma_separated_values("include", include);
-        params.insert_comma_separated_values("exclude", exclude);
-        params.insert_comma_separated_values("rowIds", row_ids);
-        params.insert_comma_separated_values("rowNumbers", row_numbers);
-        params.insert_comma_separated_values("columnIds", column_ids);
-        params.insert_value("rowsModifiedSince", rows_modified_since);
-
-        params.add_query_to_url(&mut url);
+        ParamBuilder::new(&mut url)
+            .with_comma_separated_values("include", include)
+            .with_comma_separated_values("exclude", exclude)
+            .with_comma_separated_values("rowIds", row_ids)
+            .with_comma_separated_values("rowNumbers", row_numbers)
+            .with_comma_separated_values("columnIds", column_ids)
+            .with_value("rowsModifiedSince", rows_modified_since)
+            .build();
 
         debug!("URL: {}", url);
 
@@ -289,13 +285,11 @@ impl<'a> SmartsheetApi<'a> {
             self.endpoint, "sheets", sheet_id, "rows", row_id
         );
 
-        let mut params = ParamBuilder::new();
-
-        params.insert_comma_separated_values("include", include);
-        params.insert_comma_separated_values("exclude", exclude);
-        params.insert_value("level", level);
-
-        params.add_query_to_url(&mut url);
+        ParamBuilder::new(&mut url)
+            .with_comma_separated_values("include", include)
+            .with_comma_separated_values("exclude", exclude)
+            .with_value("level", level)
+            .build();
 
         debug!("URL: {}", url);
 
@@ -349,11 +343,11 @@ impl<'a> SmartsheetApi<'a> {
     ) -> Result<IndexResult<Column>> {
         let mut url = format!("{}/{}/{}/{}", self.endpoint, "sheets", sheet_id, "columns");
 
-        let mut params = ParamBuilder::new();
-        params.insert_value("level", level);
-        params.insert_comma_separated_values("include", include);
-        params.insert_value("includeAll", include_all);
-        params.add_query_to_url(&mut url);
+        ParamBuilder::new(&mut url)
+            .with_value("level", level)
+            .with_comma_separated_values("include", include)
+            .with_value("includeAll", include_all)
+            .build();
 
         debug!("URL: {}", url);
 
@@ -414,12 +408,10 @@ impl<'a> SmartsheetApi<'a> {
             self.endpoint, "sheets", sheet_id, "columns", column_id
         );
 
-        let mut params = ParamBuilder::new();
-
-        params.insert_value("level", level);
-        params.insert_comma_separated_values("include", include);
-
-        params.add_query_to_url(&mut url);
+        ParamBuilder::new(&mut url)
+            .with_value("level", level)
+            .with_comma_separated_values("include", include)
+            .build();
 
         debug!("URL: {}", url);
 
