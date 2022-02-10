@@ -16,33 +16,63 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[features]
-default = ["rust-tls"]  # this is optimal for Linux (AWS Lambda) environments
-rust-tls = ["hyper-rustls", "rustls"]
-native-tls = ["hyper-tls"]
-
 [dependencies]
-hyper = { version = "0.14.16" ,features = ["runtime", "client", "http1", "tcp"] }
-hyper-rustls = { version = "0.23.0", optional = true, default-dependencies = false, features=["native-tokio", "tls12", "http2"] }
-# hyper-rustls = { version = "0.23.0", optional = true, default-dependencies = false }
-rustls = { version = "0.20.1", optional = true, default-features = false }
-# rustls-native-certs = { version = "0.6", optional = true }
-hyper-tls = { version = "0.5.0", optional = true }
+hyper = { version = "0.14.16", default-features = false, features = ["client"] }
 serde = { version = "1.0.136", features = ["derive"] }
-serde_json = "1.0.78"
-# serde_json = { version = "1.0.78", default-features = false, features = ["alloc"] }
-log = "0.4.14"
+serde_json = { version = "1.0.78", default-features = false }
+
+# Optional
+
+log = { version = "0.4.14", optional = true }
+hyper-rustls = { version = "0.23.0", optional = true, default-features = false, features = ["native-tokio", "http2", "tls12"] }
+rustls = { version = "0.20.1", optional = true, default-features = false }
+hyper-tls = { version = "0.5.0", optional = true }
 
 [dev-dependencies]
-version-sync = "0.9.4"  # to ensure versions in `Cargo.toml` and `README.md` are in sync
-cargo-bump = "1.1.0"  # to bump package version and tag a commit at the same time
-futures-util = { version = "0.3", default-features = false, features=["async-await"] }
-tokio = { version = "1.16.1", features = ["rt-multi-thread", "macros"] }
+# version_sync: to ensure versions in `Cargo.toml` and `README.md` are in sync
+version-sync = "0.9.4"
+# cargo-bump: to bump package version and tag a commit at the same time.
+# actually, the docs recommend installing this globally:
+#   $ cargo install cargo-bump
+# cargo-bump = "1.1.0"
+tokio = { version = "1.16.1", features = ["macros", "rt-multi-thread"] }
 pretty_env_logger = "0.4.0"
-tabled = "0.4.2"  # for pretty-printing response data in the examples
+# tabled: for pretty-printing response data in the examples
+tabled = "0.4.2"
 
 # See here for more info: https://blog.rust-lang.org/2020/03/15/docs-rs-opt-into-fewer-targets.html
 
 [package.metadata.docs.rs]
 all-features = true
 targets = ["x86_64-unknown-linux-gnu"]
+
+### FEATURES #################################################################
+
+[features]
+default = ["rust-tls", "logging", "serde-std"]
+
+# The `rust-tls` feature here is optimal for Linux (AWS Lambda) environments.
+# NOTE: Disabling both `rust-tls` *and* `native-tls` features is not supported.
+rust-tls = ["http2", "hyper-rustls", "rustls"]
+
+# This feature enables useful log output from this library, such as request
+# URL and logging of elapsed durations; it is enabled by default.
+logging = ["log"]
+
+# Use the Rust standard library with `serde_json` (default)
+serde-std = ["serde_json/std"]
+
+# Use the native TLS implementation using OpenSSL instead
+native-tls = ["http1", "hyper-tls"]
+
+# Enable HTTP/1 or HTTP/2 support via hyper. These features generally
+# shouldn't be needed to be enabled individually.
+http1 = ["hyper/http1"]
+http2 = ["hyper/http2"]
+
+# This can be enabled to receive more verbose log output from `hyper-rustls`
+rust-tls-logging = ["hyper-rustls/logging"]
+
+# Available on Rust 1.36+.
+# See https://github.com/serde-rs/json#no-std-support
+serde-alloc = ["serde_json/alloc"]

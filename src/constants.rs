@@ -1,4 +1,4 @@
-///! Library-specific constants
+//! Library-specific constants
 
 /// Base API endpoint for Smartsheet
 pub const API_ENDPOINT: &str = "https://api.smartsheet.com/2.0";

@@ -1,5 +1,5 @@
-///! Library-specific errors, including types and implementations.
-///!
+//! Library-specific errors, including types and implementations.
+//!
 use serde::{Deserialize, Serialize};
 
 /// `RequestError` is raised when the Smartsheet API responds back with a

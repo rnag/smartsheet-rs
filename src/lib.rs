@@ -52,6 +52,24 @@
 //! [hyper]: https://docs.rs/hyper
 //! [hyper-tls]: https://docs.rs/hyper-tls
 
+// #![warn(missing_docs)]
+
+mod features_check;
+
+#[cfg(feature = "logging")]
+mod log {
+    pub use log::{debug, error, trace, warn};
+}
+
+#[cfg(not(feature = "logging"))]
+mod log {
+    macro_rules! debug      ( ($($tt:tt)*) => {{}} );
+    macro_rules! error      ( ($($tt:tt)*) => {{}} );
+    macro_rules! trace      ( ($($tt:tt)*) => {{}} );
+    macro_rules! warning    ( ($($tt:tt)*) => {{}} );
+    pub(crate) use {debug, error, trace, warning as warn};
+}
+
 pub use api::SmartsheetApi;
 pub use helpers::{CellGetter, ColumnMapper};
 

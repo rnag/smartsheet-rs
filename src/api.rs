@@ -1,13 +1,14 @@
-///! Smartsheet API v2 implementation in Rust
-///!
+//! Smartsheet API v2 implementation in Rust
+//!
 use crate::auth::auth_token;
 use crate::builders::ParamBuilder;
 use crate::constants::{API_ENDPOINT, ENV_VAR_NAME};
 use crate::https::{get_connector, tls};
+use crate::log::{debug, warn};
 use crate::models::*;
 use crate::status::raise_for_status;
 use crate::types::Result;
-use crate::utils::{into_struct_from_slice, resp_into_struct};
+use crate::utils::*;
 
 use std::io::{Error, ErrorKind};
 use std::time::Instant;
@@ -15,7 +16,6 @@ use std::time::Instant;
 use hyper::client::HttpConnector;
 use hyper::header::AUTHORIZATION;
 use hyper::{Body, Client, Request};
-use log::{debug, warn};
 
 /// Client implementation for making requests to the *Smartsheet
 /// API v2*
@@ -212,16 +212,18 @@ impl<'a> SmartsheetApi<'a> {
 
         // Note: I've timed the different methods for converting response data
         // to a `struct` type, and found the buffered reader approach to work
-        // out the best for this approach. The response time seems to be quite
-        // stable where the reader implementation is used.
+        // slightly better on average (at least on a Mac OS)
 
         // 1. Bytes
-        // let sheet = into_struct_from_slice(res).await?;
+        #[cfg(feature = "serde-alloc")]
+        let sheet = into_struct_from_slice(res).await?;
 
         // 2. String
         // let sheet = into_struct_from_str(res).await?;
 
         // 3. (Buffered) Reader
+        //noinspection RsBorrowChecker
+        #[cfg(feature = "serde-std")]
         let sheet = resp_into_struct(res).await?;
 
         debug!("Deserialize: {:?}", start.elapsed());
