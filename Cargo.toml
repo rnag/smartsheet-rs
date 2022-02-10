@@ -51,7 +51,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 [features]
 default = ["rust-tls", "logging", "serde-std"]
 
-# The `rust-tls` feature here is optimal for Linux (AWS Lambda) environments.
+# The `rust-tls` feature here is ideal for Linux (AWS Lambda) environments.
 # NOTE: Disabling both `rust-tls` *and* `native-tls` features is not supported.
 rust-tls = ["http2", "hyper-rustls", "rustls"]
 
