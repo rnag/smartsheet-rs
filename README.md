@@ -3,6 +3,7 @@
 [![Crates.io](https://img.shields.io/crates/v/smartsheet-rs.svg?style=for-the-badge)](https://crates.io/crates/smartsheet-rs)
 [![Docs](https://img.shields.io/docsrs/smartsheet-rs/latest?style=for-the-badge)](https://docs.rs/smartsheet-rs)
 [![MIT](https://img.shields.io/crates/l/smartsheet-rs.svg?style=for-the-badge)](https://crates.io/crates/smartsheet-rs)
+
 **smartsheet-rs** is a *rust crate* which provides an `async` wrapper API that lets you easily interact
 with the [Smartsheet API 2.0](https://smartsheet-platform.github.io/api-docs/).
 
