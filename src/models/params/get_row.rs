@@ -4,17 +4,43 @@ use std::fmt;
 
 #[derive(Debug)]
 /// Row Include Flags are documented here:
-///   https://smartsheet-platform.github.io/api-docs/#row-cells
+///   https://smartsheet.redoc.ly/#section/Row-Include-Flags
 pub enum RowIncludeFlags {
+    /// Includes row `attachments` array.
+    ///
+    /// To include discussion attachments, both `attachments` and
+    /// `discussions` must be present in the include list.
     Attachments,
+    /// Adds a `columns` array that specifies all of the columns for the
+    /// sheet. This enables you to have the full context of the cells in the
+    /// row.
     Columns,
+    /// Includes `columnType` attribute in the row's cells indicating the type
+    /// of the column the cell resides in.
     ColumnType,
+    /// Includes row `discussions` array.
+    ///
+    /// To include discussion attachments, both `attachments` and `discussions`
+    /// must be present in the include list.
     Discussions,
+    /// Includes `filteredOut` attribute indicating if the row should be
+    /// displayed or hidden according to the sheet's filters.
     Filters,
+    /// Includes `format` attribute on the row, its cells, or summary fields.
+    /// See [Formatting](https://smartsheet.redoc.ly/#section/API-Basics/Formatting).
     Format,
+    /// Includes `objectValue` attribute on cells containing values. For more
+    /// information see [Cell Reference](https://smartsheet.redoc.ly/tag/cellsRelated#section/Cell-Reference).
     ObjectValue,
+    /// Includes `permalink` attribute that represents a direct link to the
+    /// row in the Smartsheet application.
     RowPermalink,
+    /// **DEPRECATED** Includes `createdBy` and `modifiedBy` attributes on the
+    /// row, indicating the row's creator, and last modifier.
+    #[deprecated(note = "Use `RowIncludeFlags::WriterInfo` instead")]
     RowWriterInfo,
+    /// Includes `createdBy` and `modifiedBy` attributes on the row or summary
+    /// fields, indicating the row or summary field's creator, and last modifier.
     WriterInfo,
 }
 

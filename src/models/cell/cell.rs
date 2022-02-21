@@ -1,4 +1,4 @@
-use crate::models::{CellValue, Hyperlink};
+use crate::models::{CellValue, Hyperlink, Image};
 use crate::types::Result;
 
 use core::fmt::Error;
@@ -11,12 +11,18 @@ use serde_json::value::Value;
 use serde_json::Number;
 
 #[derive(Default, Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Cell {
-    #[serde(rename = "columnId")]
+    /// The Id of the column that the cell is located in.
     pub column_id: u64,
-    #[serde(rename = "columnType")]
+    /// Only returned if the include query string parameter contains
+    /// `columnType`.
     // #[serde(skip_serializing)]
     pub column_type: Option<String>,
+    /// The format descriptor describing this cell's conditional format. Only
+    /// returned if the include query string parameter contains `format` and
+    /// this cell has a conditional format applied.
+    pub conditional_format: Option<String>,
     /// Represents a hyperlink to a dashboard, report, sheet, or URL.
     ///
     /// In the most common scenario, the hyperlink is a URL link, and the `url`
@@ -49,7 +55,6 @@ pub struct Cell {
     /// # More info
     ///
     /// - https://smartsheet-platform.github.io/api-docs/#cell-reference
-    #[serde(rename = "displayValue")]
     // #[serde(skip_serializing)]
     pub display_value: Option<String>,
     /// `Cell.objectValue` is an object representation of a cell's value and
@@ -59,11 +64,36 @@ pub struct Cell {
     /// # More info
     ///
     /// - https://smartsheet-platform.github.io/api-docs/#cell-reference
-    #[serde(rename = "objectValue")]
     // #[serde(skip_serializing)]
     pub object_value: Option<Value>,
+    /// The format descriptor. Only returned if the include query string
+    /// parameter contains `format` and this cell has a non-default format
+    /// applied.
     pub format: Option<String>,
+    /// The formula for a cell, if set, for instance **=COUNTM([Assigned To]3)**.
+    ///
+    /// Note that calculation errors or problems with a formula do not cause
+    /// the API call to return an error code. Instead, the response contains
+    /// the same value as in the UI, such as
+    /// `cell.value = "#CIRCULAR REFERENCE"`.
     pub formula: Option<String>,
+    /// Cell Image object
+    pub image: Option<Image>,
+    /// (Admin only) Indicates whether the cell value can contain a value
+    /// outside of the validation limits (value = **true**). When using this
+    /// parameter, you must also set `strict` to **false** to bypass value
+    /// type checking. This property is honored for POST or PUT actions that
+    /// update rows.
+    #[serde(skip_deserializing)]
+    pub override_validation: Option<bool>,
+    /// Set to false to enable lenient parsing. Defaults to true. You can
+    /// specify this attribute in a request, but it is never present in a
+    /// response.
+    #[serde(skip_deserializing)]
+    pub strict: Option<bool>,
+    // TODO add below fields (low priority)
+    // pub link_in_from_cell: Object,
+    // pub links_out_to_cells: Object,
 }
 
 impl Serialize for Cell {
