@@ -71,20 +71,22 @@ impl Serialize for Cell {
     where
         S: Serializer,
     {
-        let mut state = serializer.serialize_struct("Cell", 20)?;
-
-        let item_count = 0;
-        let mut has_link = false;
-        let mut has_obj_value = false;
-
-        let link1: &Hyperlink;
+        let mut cell = serializer.serialize_struct("Cell", 3)?;
+        cell.serialize_field("columnId", &self.column_id)?;
 
         if let Some(link) = &self.hyperlink {
-            link1 = link;
+            cell.serialize_field("hyperlink", link)?;
         }
 
-        state.serialize_field("columnId", &self.column_id)?;
-        state.end()
+        if let Some(value) = &self.value {
+            cell.serialize_field("value", value)?;
+        }
+
+        if let Some(object_value) = &self.object_value {
+            cell.serialize_field("objectValue", object_value)?;
+        }
+
+        cell.end()
     }
 }
 
@@ -179,5 +181,69 @@ impl Cell {
         } else {
             None
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::models::CellValue::Text;
+    use indoc::indoc;
+    use serde_json::{json, to_string_pretty};
+
+    #[test]
+    fn test_it() {
+        let c = Cell {
+            column_id: 0,
+            column_type: None,
+            hyperlink: None,
+            value: None,
+            display_value: None,
+            object_value: None,
+            format: None,
+            formula: None,
+        };
+        println!("{}", to_string_pretty(&c).unwrap());
+
+        assert_eq!(
+            to_string_pretty(&c).unwrap(),
+            indoc!(
+                r#"
+            {
+              "columnId": 0
+            }"#
+            )
+        );
+    }
+
+    #[test]
+    fn test_another() {
+        let c = Cell {
+            column_id: 54321,
+            column_type: Some("Testing".to_owned()),
+            hyperlink: Some(Hyperlink {
+                url: "abc".to_owned(),
+                ..Default::default()
+            }),
+            value: Some(Text("My value".to_owned())),
+            display_value: Some("Something".to_owned()),
+            object_value: Some(json!(1.2)),
+            format: Some("My format".to_owned()),
+            formula: Some("My formula".to_owned()),
+        };
+        assert_eq!(
+            to_string_pretty(&c).unwrap(),
+            indoc!(
+                r#"
+            {
+              "columnId": 54321,
+              "hyperlink": {
+                "url": "abc"
+              },
+              "value": "My value",
+              "objectValue": 1.2
+            }"#
+            )
+        );
     }
 }

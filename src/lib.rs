@@ -102,6 +102,7 @@ mod api;
 pub mod auth;
 pub mod builders;
 pub mod constants;
+mod env;
 pub mod helpers;
 mod https;
 pub mod models;
