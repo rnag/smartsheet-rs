@@ -1,13 +1,10 @@
 use crate::models::{AccessLevel, Attachment, Cell, Column, Discussion, User};
 use crate::types::Result;
+use crate::utils::is_default;
 
 use core::option::Option;
 use serde::{Deserialize, Serialize};
 use std::io::{Error, ErrorKind};
-
-fn is_default<T: Default + PartialEq>(t: &T) -> bool {
-    t == &T::default()
-}
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

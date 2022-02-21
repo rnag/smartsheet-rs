@@ -310,7 +310,7 @@ impl<'a> SmartsheetApi<'a> {
     }
 
     pub async fn add_row(&self, sheet_id: u64, row: Row) -> Result<Value> {
-        let mut url: String = format!("{}/{}/{}/{}", self.endpoint, "sheets", sheet_id, "rows");
+        let url: String = format!("{}/{}/{}/{}", self.endpoint, "sheets", sheet_id, "rows");
 
         debug!("URL: {}", url);
 

@@ -241,12 +241,12 @@ mod test {
 
         assert_eq!(
             to_string_pretty(&c).unwrap(),
-            indoc!(
-                r#"
-            {
-              "columnId": 0
-            }"#
-            )
+            indoc! {r#"
+                {
+                  "columnId": 0
+                }
+            "#}
+            .trim()
         );
     }
 
@@ -271,17 +271,17 @@ mod test {
         };
         assert_eq!(
             to_string_pretty(&c).unwrap(),
-            indoc!(
-                r#"
-            {
-              "columnId": 54321,
-              "hyperlink": {
-                "url": "abc"
-              },
-              "value": "My value",
-              "objectValue": 1.2
-            }"#
-            )
+            indoc! {r#"
+                {
+                  "columnId": 54321,
+                  "hyperlink": {
+                    "url": "abc"
+                  },
+                  "value": "My value",
+                  "objectValue": 1.2
+                }
+            "#}
+            .trim()
         );
     }
 }

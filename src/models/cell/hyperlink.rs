@@ -12,6 +12,7 @@ pub struct Hyperlink {
     /// When the hyperlink is a dashboard/report/sheet link (that is,
     /// dashboardId, reportId, or sheetId is non-null), this property contains
     /// the permalink to the dashboard, report, or sheet.
+    #[serde(skip_serializing_if = "String::is_empty")]
     pub url: String,
     /// If non-null, this hyperlink is a link to the report with this Id.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -22,4 +23,28 @@ pub struct Hyperlink {
     /// If non-null, this hyperlink is a link to the dashboard with this Id.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sight_id: Option<u64>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use indoc::indoc;
+
+    #[test]
+    fn test_link() {
+        let link = Hyperlink {
+            sheet_id: Some(12345),
+            ..Default::default()
+        };
+
+        assert_eq!(
+            serde_json::to_string_pretty(&link).unwrap(),
+            indoc! {r#"
+                {
+                  "sheetId": 12345
+                }
+            "#}
+            .trim()
+        )
+    }
 }

@@ -45,6 +45,7 @@ pub enum RowIncludeFlags {
 }
 
 impl EnumStr for RowIncludeFlags {
+    #[allow(deprecated)]
     fn as_str<'a>(&self) -> &'a str {
         match self {
             Self::Attachments => "attachments",
