@@ -226,12 +226,16 @@ mod test {
         let c = Cell {
             column_id: 0,
             column_type: None,
+            conditional_format: None,
             hyperlink: None,
             value: None,
             display_value: None,
             object_value: None,
             format: None,
             formula: None,
+            image: None,
+            override_validation: None,
+            strict: None,
         };
         println!("{}", to_string_pretty(&c).unwrap());
 
@@ -251,6 +255,7 @@ mod test {
         let c = Cell {
             column_id: 54321,
             column_type: Some("Testing".to_owned()),
+            conditional_format: None,
             hyperlink: Some(Hyperlink {
                 url: "abc".to_owned(),
                 ..Default::default()
@@ -260,6 +265,9 @@ mod test {
             object_value: Some(json!(1.2)),
             format: Some("My format".to_owned()),
             formula: Some("My formula".to_owned()),
+            image: None,
+            override_validation: None,
+            strict: None,
         };
         assert_eq!(
             to_string_pretty(&c).unwrap(),
