@@ -34,6 +34,30 @@ pub enum CellValue {
     Numeric(Number),
 }
 
+impl From<&str> for CellValue {
+    fn from(value: &str) -> Self {
+        Text(value.to_owned())
+    }
+}
+
+impl From<bool> for CellValue {
+    fn from(value: bool) -> Self {
+        Boolean(value)
+    }
+}
+
+impl From<u64> for CellValue {
+    fn from(value: u64) -> Self {
+        Numeric(Number::from(value))
+    }
+}
+
+impl From<f64> for CellValue {
+    fn from(value: f64) -> Self {
+        Numeric(Number::from_f64(value).unwrap())
+    }
+}
+
 impl CellValue {
     pub fn as_str(&self) -> Result<&str> {
         if let Text(value) = &self {

@@ -1,6 +1,6 @@
 //! Public helper utilities
 //!
-use crate::models::{Cell, Column, Row};
+use crate::models::{Cell, CellValue, Column, Row};
 use crate::types::Result;
 
 use std::collections::HashMap;
@@ -130,5 +130,188 @@ impl<'a> CellGetter<'a> {
         }
 
         col_name_to_cell
+    }
+}
+
+/// **Row Getter** - Utility to make it easier to find and retrieve row(s)
+/// in an array of `Row` objects, based on a predicate or a pre-defined
+/// filter condition.
+///
+/// For example, a common use case is finding a `Row` where a cell is
+/// *equal* to a specific value.
+///
+pub struct RowGetter<'a> {
+    /// Represents an array of *Row* objects that we want to run a search on.
+    pub rows: &'a [Row],
+    /// Represents a mapping of *Column Name* to *Column ID*
+    ///
+    /// Note that the ID value is unique, internal, and used mainly in the
+    /// Smartsheet API.
+    pub column_name_to_id: &'a ColumnNameToId<'a>,
+}
+
+impl<'a> RowGetter<'a> {
+    /// Create a new `RowGetter` from a reference to a `ColumnMapper` object
+    pub fn new(rows: &'a [Row], columns: &'a ColumnMapper<'a>) -> RowGetter<'a> {
+        Self {
+            rows,
+            column_name_to_id: &columns.name_to_id,
+        }
+    }
+
+    /// Uses an **equals (eq)** condition to compare a cell for a *Column
+    /// Name* against a specified *Value*.
+    pub fn where_eq<V: Into<CellValue>>(
+        &'a self,
+        column_name: &'a str,
+        value: V,
+    ) -> Result<RowFinder<'a>> {
+        RowFinder::new(
+            self.rows,
+            self.column_name_to_id,
+            column_name,
+            value.into(),
+            Comp::EQ,
+        )
+    }
+
+    /// Uses an **equals (eq)** condition to compare a cell for a *Column
+    /// ID* against a specified *Value*.
+    pub fn where_eq_by_id<V: Into<CellValue>>(&'a self, column_id: u64, value: V) -> RowFinder<'a> {
+        RowFinder::new_by_id(self.rows, column_id, value.into(), Comp::EQ)
+    }
+
+    /// Uses a **not equals (ne)** condition to compare a cell for a *Column
+    /// Name* against a specified *Value*.
+    pub fn where_ne<V: Into<CellValue>>(
+        &'a self,
+        column_name: &'a str,
+        value: V,
+    ) -> Result<RowFinder<'a>> {
+        RowFinder::new(
+            self.rows,
+            self.column_name_to_id,
+            column_name,
+            value.into(),
+            Comp::NE,
+        )
+    }
+
+    /// Uses a **not equals (ne)** condition to compare a cell for a *Column
+    /// ID* against a specified *Value*.
+    pub fn where_ne_by_id<V: Into<CellValue>>(&'a self, column_id: u64, value: V) -> RowFinder<'a> {
+        RowFinder::new_by_id(self.rows, column_id, value.into(), Comp::NE)
+    }
+}
+
+/// Enum which represents a Comparison operator or a Search Criteria
+pub enum Comp {
+    EQ,
+    NE,
+}
+
+impl Comp {
+    /// Return a closure which compares two `CellValue`s to determine
+    /// equality.
+    pub fn get_cell_comparator<'a>(&'a self) -> fn(&'a CellValue, &'a CellValue) -> bool {
+        match self {
+            Comp::EQ => |v1: &'a CellValue, v2: &'a CellValue| v1 == v2,
+            Comp::NE => |v1: &'a CellValue, v2: &'a CellValue| v1 != v2,
+        }
+    }
+}
+
+/// **Row Finder**: Find row(s) in an array of `Row`s that match a pre-defined
+/// condition.
+///
+/// # Note
+/// It's preferable to use the [`RowGetter`] implementation instead, as
+/// that's a little easier to work with.
+///
+pub struct RowFinder<'a> {
+    /// Represents an array of *Row* objects that we want to run a search on.
+    pub rows: &'a [Row],
+    /// Column Id to filter the value by.
+    column_id: u64,
+    /// Value to filter by.
+    value: CellValue,
+    /// Determines how we intend to compare cell value against `value`.
+    cmp: Comp,
+}
+
+impl<'a> RowFinder<'a> {
+    /// Create a new `RowFinder`.
+    ///
+    /// # Note
+    /// It's preferable to use the [`RowGetter`] implementation instead, as
+    /// that's a little easier to work with.
+    ///
+    pub fn new(
+        rows: &'a [Row],
+        column_name_to_id: &'a ColumnNameToId<'a>,
+        column_name: &'a str,
+        value: CellValue,
+        cmp: Comp,
+    ) -> Result<Self> {
+        let column_id = match column_name_to_id.get(column_name) {
+            Some(&v) => v,
+            None => {
+                return Err(Box::from(Error::new(
+                    ErrorKind::NotFound,
+                    format!(
+                        "The column name `{}` does not exist in the sheet",
+                        column_name
+                    ),
+                )));
+            }
+        };
+
+        Ok(Self::new_by_id(rows, column_id, value, cmp))
+    }
+
+    /// Create a new `RowFinder` by *Column Id* instead of *Column Name*.
+    pub fn new_by_id(rows: &'a [Row], column_id: u64, value: CellValue, cmp: Comp) -> Self {
+        Self {
+            rows,
+            column_id,
+            value,
+            cmp,
+        }
+    }
+
+    /// Find the *first* `Row` matching a specified condition.
+    pub fn first<'b>(&'b self) -> Result<&'a Row> {
+        let cmp = self.cmp.get_cell_comparator();
+
+        return match self.rows.iter().find(|row| {
+            if let Ok(cell) = row.get_cell_by_id(self.column_id) {
+                matches!(&cell.value, Some(cv) if cmp(&self.value, cv))
+            } else {
+                false
+            }
+        }) {
+            Some(row) => Ok(row),
+            None => Err(Box::from(Error::new(
+                ErrorKind::NotFound,
+                "No matching row for the condition",
+            ))),
+        };
+    }
+
+    /// Find *all* `Row`s matching a specified condition.
+    pub fn find_all<'b>(&'b self) -> Result<Vec<&'a Row>> {
+        let cmp = self.cmp.get_cell_comparator();
+
+        Ok(self
+            .rows
+            .iter()
+            .filter(|row| {
+                if let Ok(cell) = row.get_cell_by_id(self.column_id) {
+                    matches!(&cell.value, Some(cv) if cmp(&self.value, cv))
+                } else {
+                    false
+                }
+            })
+            .collect::<Vec<_>>())
     }
 }
