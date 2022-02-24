@@ -16,7 +16,6 @@ use std::time::Instant;
 use hyper::client::HttpConnector;
 use hyper::header::AUTHORIZATION;
 use hyper::{Body, Client, Request};
-use serde_json::Value;
 
 /// Client implementation for making requests to the *Smartsheet
 /// API v2*
@@ -309,8 +308,25 @@ impl<'a> SmartsheetApi<'a> {
         Ok(row)
     }
 
-    pub async fn add_row(&self, sheet_id: u64, row: Row) -> Result<Value> {
-        let url: String = format!("{}/{}/{}/{}", self.endpoint, "sheets", sheet_id, "rows");
+    pub async fn add_row(&self, sheet_id: u64, row: Row) -> Result<AddRowResult> {
+        self.add_row_with_params(sheet_id, row, None, None).await
+    }
+
+    /// allowPartialSuccess - Default: False. When specified with a value of true, enables partial success for this bulk operation. See Partial Success for more information
+    /// overrideValidation - Default: False. You may use the query string parameter overrideValidation with a value of true to allow a cell value outside of the validation limits. You must specify strict with a value of false to bypass value type checking.
+    pub async fn add_row_with_params(
+        &self,
+        sheet_id: u64,
+        row: Row,
+        allow_partial_success: Option<bool>,
+        override_validation: Option<bool>,
+    ) -> Result<AddRowResult> {
+        let mut url: String = format!("{}/{}/{}/{}", self.endpoint, "sheets", sheet_id, "rows");
+
+        ParamBuilder::new(&mut url)
+            .with_value("allowPartialSuccess", allow_partial_success)
+            .with_value("overrideValidation", override_validation)
+            .build();
 
         debug!("URL: {}", url);
 

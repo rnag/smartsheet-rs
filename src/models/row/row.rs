@@ -117,7 +117,40 @@ pub struct Row {
     // pub proofs: Proofs
 }
 
+impl<const N: usize> From<&[Cell; N]> for Row {
+    fn from(cells: &[Cell; N]) -> Self {
+        Self {
+            cells: cells.to_vec(),
+            ..Default::default()
+        }
+    }
+}
+
+impl From<Vec<Cell>> for Row {
+    fn from(cells: Vec<Cell>) -> Self {
+        Self {
+            cells,
+            ..Default::default()
+        }
+    }
+}
+
 impl Row {
+    pub fn with_cells<C: Into<Vec<Cell>>>(cells: C) -> Self {
+        Row {
+            cells: cells.into(),
+            ..Default::default()
+        }
+    }
+
+    pub fn with_id_and_cells<C: Into<Vec<Cell>>>(row_id: u64, cells: C) -> Self {
+        Row {
+            id: row_id,
+            cells: cells.into(),
+            ..Default::default()
+        }
+    }
+
     /// Retrieve a specified `Cell` - for a given *column id* - from the `Row`
     pub fn get_cell_by_id(&self, column_id: u64) -> Result<&Cell> {
         for cell in &self.cells {

@@ -96,6 +96,7 @@ pub struct Cell {
     // pub links_out_to_cells: Object,
 }
 
+// TODO Update or remove this logic
 impl Serialize for Cell {
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
@@ -116,11 +117,32 @@ impl Serialize for Cell {
             cell.serialize_field("objectValue", object_value)?;
         }
 
+        if let Some(strict) = &self.strict {
+            cell.serialize_field("strict", strict)?;
+        }
+
+        if let Some(override_validation) = &self.override_validation {
+            cell.serialize_field("overrideValidation", override_validation)?;
+        }
+
         cell.end()
     }
 }
 
 impl Cell {
+    /// Create a new `Cell` with a *Column Id*
+    pub fn new(column_id: u64) -> Self {
+        Self {
+            column_id,
+            ..Default::default()
+        }
+    }
+
+    pub fn with_strict(mut self, strict: bool) -> Cell {
+        self.strict = Some(strict);
+        self
+    }
+
     /// Retrieve the Cell `value` as a *string*
     pub fn value_as_str(&self) -> Result<&str> {
         if let Some(value) = &self.value {
@@ -296,8 +318,8 @@ mod test {
             format: None,
             formula: None,
             image: None,
-            override_validation: None,
-            strict: None,
+            override_validation: Some(false),
+            strict: Some(false),
         };
         println!("{}", to_string_pretty(&c).unwrap());
 
@@ -305,7 +327,9 @@ mod test {
             to_string_pretty(&c).unwrap(),
             indoc! {r#"
                 {
-                  "columnId": 0
+                  "columnId": 0,
+                  "strict": false,
+                  "overrideValidation": false
                 }
             "#}
             .trim()

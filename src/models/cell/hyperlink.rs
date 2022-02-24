@@ -25,6 +25,28 @@ pub struct Hyperlink {
     pub sight_id: Option<u64>,
 }
 
+impl Hyperlink {
+    /// Create a new `Hyperlink` object with a **url**
+    pub fn with_url<S: Into<String>>(url: S) -> Self {
+        Self {
+            url: url.into(),
+            ..Default::default()
+        }
+    }
+}
+
+impl From<&str> for Hyperlink {
+    fn from(value: &str) -> Self {
+        Self::with_url(value)
+    }
+}
+
+impl From<String> for Hyperlink {
+    fn from(value: String) -> Self {
+        Self::with_url(value)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

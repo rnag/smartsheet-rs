@@ -1,4 +1,5 @@
 use crate::models::CellValue::{Boolean, Numeric, Text};
+use crate::models::{Decision, LightPicker};
 use crate::types::Result;
 
 use core::fmt::Error;
@@ -61,6 +62,18 @@ impl From<u64> for CellValue {
 impl From<f64> for CellValue {
     fn from(value: f64) -> Self {
         Numeric(Number::from_f64(value).unwrap())
+    }
+}
+
+impl From<Decision> for CellValue {
+    fn from(value: Decision) -> Self {
+        Text(value.to_string())
+    }
+}
+
+impl From<LightPicker> for CellValue {
+    fn from(value: LightPicker) -> Self {
+        Text(value.to_string())
     }
 }
 

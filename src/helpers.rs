@@ -7,9 +7,9 @@ use std::collections::HashMap;
 use std::io::{Error, ErrorKind};
 
 /// Define type aliases for the column mappings so that we can DRY.
-type ColumnNameToId<'a> = HashMap<&'a str, u64>;
-type ColumnIdToName<'a> = HashMap<u64, &'a str>;
-type ColumnNameToCell<'a> = HashMap<&'a str, &'a Cell>;
+pub type ColumnNameToId<'a> = HashMap<&'a str, u64>;
+pub type ColumnIdToName<'a> = HashMap<u64, &'a str>;
+pub type ColumnNameToCell<'a> = HashMap<&'a str, &'a Cell>;
 
 /// **Column Mapper** - Utility to generate the `name` <-> `id` mappings for
 /// columns in a sheet.
