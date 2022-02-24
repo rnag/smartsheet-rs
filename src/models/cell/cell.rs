@@ -212,6 +212,24 @@ impl Cell {
             None
         }
     }
+
+    /// Get the underlying list of values of the `object_value`. This assumes
+    /// that the `objectType` is either **MULTI_PICKLIST** or **MULTI_CONTACT**.
+    ///
+    /// For more info, refer to the [ObjectValue object].
+    ///
+    /// [ObjectValue object]: https://smartsheet-platform.github.io/api-docs/#objectvalue-object
+    ///
+    pub fn values(&self) -> Result<&Vec<Value>> {
+        if let Some(obj_value) = &self.object_value {
+            if let Some(obj_values) = obj_value.get("values") {
+                if let Some(values) = obj_values.as_array() {
+                    return Ok(values);
+                }
+            }
+        }
+        Err(Box::new(Error::default()))
+    }
 }
 
 #[cfg(test)]
@@ -219,10 +237,54 @@ mod test {
     use super::*;
     use crate::models::CellValue::Text;
     use indoc::indoc;
-    use serde_json::{json, to_string_pretty};
+    use serde_json::{from_str, json, to_string_pretty};
 
     #[test]
-    fn test_it() {
+    fn test_deserialize_cell() {
+        let json = indoc! {r#"
+                {
+                  "columnId": 54321,
+                  "hyperlink": {
+                    "url": "abc"
+                  },
+                  "value": "My value",
+                  "objectValue": 1.2
+                }
+            "#};
+
+        let cell: Cell = from_str(json).unwrap();
+
+        println!("Result: {:#?}", cell);
+    }
+
+    #[test]
+    fn test_deserialize_and_get_values() {
+        let json = indoc! {r#"
+                {
+                  "columnId": 54321,
+                  "hyperlink": {
+                    "url": "abc"
+                  },
+                  "value": "My value",
+                  "objectValue": {
+                    "objectType": "MULTI_PICKLIST",
+                    "values": ["hello", "world"]
+                  }
+                }
+            "#};
+
+        let cell: Cell = from_str(json).unwrap();
+
+        println!("Result: {:#?}", cell);
+
+        let values = cell.values().unwrap();
+        println!("Values: {:#?}", values);
+
+        assert_eq!(values, json!(["hello", "world"]).as_array().unwrap());
+    }
+
+    #[test]
+    fn test_serialize() {
         let c = Cell {
             column_id: 0,
             column_type: None,
@@ -251,7 +313,7 @@ mod test {
     }
 
     #[test]
-    fn test_another() {
+    fn test_serialize_more_complex() {
         let c = Cell {
             column_id: 54321,
             column_type: Some("Testing".to_owned()),

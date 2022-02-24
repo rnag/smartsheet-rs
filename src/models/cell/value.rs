@@ -40,6 +40,12 @@ impl From<&str> for CellValue {
     }
 }
 
+impl From<char> for CellValue {
+    fn from(value: char) -> Self {
+        Text(value.to_string())
+    }
+}
+
 impl From<bool> for CellValue {
     fn from(value: bool) -> Self {
         Boolean(value)
