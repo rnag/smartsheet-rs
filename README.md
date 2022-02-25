@@ -96,7 +96,7 @@ with the Smartsheet API.
 
 #### Retrieve Cells
 
-To retrieve an individual `Cell` from a `Row` by its associated *Column Id*, you can simply use `Row::get_cell_by_id`.
+To retrieve an individual cell from a row by its associated *Column Id*, you can simply use `Row::get_cell_by_id`.
 
 To instead retrieve a single `Cell` by its *column name*, you can first 
 build out a mapping of *Column Name to Id* with a `ColumnMapper`, and then
@@ -164,7 +164,7 @@ println!("{:#?}", column_name_to_cell);
 
 #### Retrieve Rows
 
-To find one or more `Row`s from a list that match a specified condition, you can use the `RowGetter` helper
+To find one or more rows from a list that match a specified condition, you can use the `RowGetter` helper
 to make the task much more convenient.
 
 Here's a simple example to find the **first** `Row` where a `Cell` from a column has a particular value, and find
@@ -217,13 +217,12 @@ async fn main() -> Result<()> {
 
 #### Create Rows
 
-To add or update rows, it's necessary to build out a list of `Cell`s to update the
+To add or update rows, it's necessary to build out a list of cells to update the
 values for, and then add the cells to the row.
+The helper *struct* `CellFactory` can be used to construct `Cell` objects to add to a `Row`.
 
 Note that to *add* rows, we need to pass in a [location-specifier](https://smartsheet.redoc.ly/#section/Specify-Row-Location) attribute.
 To *update* rows, we only need to set the *Row Id* for each row.
-
-The helper *struct* `CellFactory` can be used to construct `Cell` objects to add to a `Row`.
 
 An example of *adding* a new `Row` to a sheet is shown below. Here we set the location specifier
 `to_top` to send the new row to the top of the sheet.
