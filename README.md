@@ -255,7 +255,7 @@ async fn main() -> Result<()> {
         make.cell("Symbol Column #1", LightPicker::Yellow)?,
         make.cell("Symbol Column #2", Decision::Hold)?,
         make.cell("Checkbox Column", true)?,
-        make.contact_cell("Assigned To", "user2.email@smartsheet.com")?,
+        make.contact_cell("Assigned To", "user1.email@smartsheet.com")?,
         make.url_hyperlink_cell("Link to Page", "Rust Homepage", "https://rust-lang.org")?,
         make.multi_picklist_cell(
             "Multi Dropdown Column",
