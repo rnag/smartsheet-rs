@@ -91,7 +91,7 @@ async fn main() -> Result<()> {
     // Location specifier: this is optional
     rows.to_top(true);
 
-    let result = smart
+    let rows = smart
         // alternatively:
         //   .update_rows(sheet_id, [row1, row2].to_bottom(true))
         .update_rows_with_params(sheet_id, rows, false, true)
@@ -99,6 +99,11 @@ async fn main() -> Result<()> {
 
     println!("Updated Rows in {:.2?}", start.elapsed());
     println!();
+
+    // Print out the IDs of each Row that were updated.
+    for row in rows.result {
+        println!("  - Row ID: {}", row.id);
+    }
 
     Ok(())
 }

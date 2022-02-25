@@ -8,12 +8,14 @@ use serde::{Deserialize, Serialize};
 /// [Result]: https://smartsheet.redoc.ly/#section/Result-Object
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct RowResult {
+pub struct RowResult<R = Row> {
     pub message: Message,
-    pub result: Vec<Row>,
+    pub result: Vec<R>,
     pub result_code: i64,
-    pub version: i64,
-    pub failed_items: Option<Vec<Row>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub version: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub failed_items: Option<Vec<R>>,
 }
 
 /// Represents a `Message` enum, which can be one of:

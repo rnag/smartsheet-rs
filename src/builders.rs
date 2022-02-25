@@ -39,6 +39,23 @@ impl<'a> ParamBuilder<'a> {
         self
     }
 
+    /// Insert an array of `T` objects - which can be `enum` types that
+    /// implement `std::fmt::Display` for example - as a comma-separated
+    /// string value for a query parameter named `key`.
+    pub fn with_array<T: std::fmt::Display, const N: usize>(
+        &mut self,
+        key: &'a str,
+        values: [T; N],
+    ) -> &mut Self {
+        let mut string_val = values
+            .iter()
+            .fold(String::new(), |accum, e| accum + &e.to_string() + ",");
+        string_val.pop();
+        self.params.insert(key, string_val);
+
+        self
+    }
+
     /// Insert a single`T` object which implements `std::fmt::Display` - such
     /// as a *string* - as a value for a query parameter named `key`.
     pub fn with_value<T: std::fmt::Display>(

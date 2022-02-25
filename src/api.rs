@@ -392,6 +392,73 @@ impl<'a> SmartsheetApi<'a> {
         Ok(result)
     }
 
+    /// **Delete Rows** - Deletes one or more specified rows from the sheet.
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to delete the rows from.
+    /// * `row_ids` - An array (list) containing the IDs of the Rows to
+    ///               delete from the smartsheet.
+    ///
+    /// # Docs
+    /// - <https://smartsheet-platform.github.io/api-docs/#delete-rows>
+    ///
+    pub async fn delete_rows<const N: usize>(
+        &self,
+        sheet_id: u64,
+        row_ids: impl Into<[u64; N]>,
+    ) -> Result<RowResult<u64>> {
+        self.delete_rows_with_params(sheet_id, row_ids, None).await
+    }
+
+    /// **Delete Rows** - Deletes one or more specified rows from the sheet,
+    /// with included _query parameters_.
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to delete the rows from.
+    /// * `row_ids` - An array (list) containing the IDs of the Rows to
+    ///               delete from the smartsheet.
+    /// * `ignore_rows_not_found` -  Default: false. If set to false and any of
+    ///              the specified Row IDs are not found, no rows are deleted,
+    ///              and the "not found" error is returned.
+    ///
+    /// # Docs
+    /// - <https://smartsheet-platform.github.io/api-docs/#delete-rows>
+    ///
+    pub async fn delete_rows_with_params<const N: usize>(
+        &self,
+        sheet_id: u64,
+        row_ids: impl Into<[u64; N]>,
+        ignore_rows_not_found: impl Into<Option<bool>>,
+    ) -> Result<RowResult<u64>> {
+        // The endpoint to ADD or UPDATE rows is the same.
+        let mut url: String = format!("{}/{}/{}/{}", self.endpoint, "sheets", sheet_id, "rows");
+
+        ParamBuilder::new(&mut url)
+            .with_array("ids", row_ids.into())
+            .with_value("ignoreRowsNotFound", ignore_rows_not_found.into())
+            .build();
+
+        debug!("URL: {}", url);
+
+        let req = Request::delete(&url)
+            .header(AUTHORIZATION, &self.bearer_token)
+            .body(Body::empty())?;
+
+        let mut res = self.client.request(req).await?;
+        raise_for_status(url, &mut res).await?;
+
+        let start = Instant::now();
+
+        // asynchronously aggregate the chunks of the body
+        let result = into_struct_from_slice(res).await?;
+
+        debug!("Deserialize: {:?}", start.elapsed());
+
+        Ok(result)
+    }
+
     /// **List Columns** - Gets a list of all columns belonging to the specified sheet.
     ///
     /// # Docs
