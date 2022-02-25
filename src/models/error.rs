@@ -45,11 +45,10 @@ impl RequestError {
 /// - https://smartsheet-platform.github.io/api-docs/#complete-error-code-list
 ///
 #[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SmartsheetError {
     pub message: String,
-    #[serde(rename = "errorCode")]
     pub error_code: u16,
-    #[serde(rename = "refId")]
     pub ref_id: Option<String>,
 }
 
