@@ -10,7 +10,7 @@ use std::time::Instant;
 
 use smartsheet_rs;
 use smartsheet_rs::models::CellValue::{Numeric, Text};
-use smartsheet_rs::models::{Cell, CellBuilder, LightPicker, Row, RowLocationSpecifier};
+use smartsheet_rs::models::{Cell, CellFactory, LightPicker, Row, RowLocationSpecifier};
 use smartsheet_rs::ColumnMapper;
 
 // A simple type alias so as to DRY.
@@ -42,7 +42,7 @@ async fn main() -> Result<()> {
     let index_result = smart.list_columns(sheet_id).await?;
 
     let cols = ColumnMapper::new(&index_result.data);
-    let make = CellBuilder::new(&cols);
+    let make = CellFactory::new(&cols);
 
     // println!("Column Name to ID: {:#?}", cols.name_to_id);
 
@@ -52,27 +52,27 @@ async fn main() -> Result<()> {
 
     // Column 1 - Type: TEXT / NUMBER
     let mut c1 = make
-        .new_cell("Primary Column", "New Value")?
+        .cell("Primary Column", "New Value")?
         // This disables validation in the case of a dropdown, so it's not ideal.
         .with_strict(false);
 
     // Column 2 - Type: TEXT / NUMBER
-    let c2 = make.new_cell("Column2", "")?;
+    let c2 = make.cell("Column2", "")?;
 
     // Column 3 - Type: SYMBOLS -> LIGHT PICKER (Red, Yellow, Green, Blue, Gray)
-    let c3 = make.new_cell("Column3", LightPicker::Green)?;
+    let c3 = make.cell("Column3", LightPicker::Green)?;
 
     // Column 4 - Type: CHECKBOX *or* SYMBOLS -> STAR/FLAG
-    let c4 = make.new_cell("Column4", false)?;
+    let c4 = make.cell("Column4", false)?;
 
     // Column 5 - Type: DROPDOWN (MULTI SELECT)
-    let c5 = make.new_multi_picklist_cell("Column5", &["Three...", "Two...", "And ONE"])?;
+    let c5 = make.multi_picklist_cell("Column5", &["Three...", "Two...", "And ONE"])?;
 
     // Column 6 - Type: CONTACT LIST (MULTI SELECT)
-    let c6 = make.new_multi_contact_cell("Column6", &["abc@xyz.org".into()])?;
+    let c6 = make.multi_contact_cell("Column6", &["abc@xyz.org".into()])?;
 
     // Column 7 - Type: HYPERLINK, /w URL
-    let c7 = make.new_url_hyperlink_cell("Column7", "UPDATED Link", "https://google-world.com")?;
+    let c7 = make.url_hyperlink_cell("Column7", "UPDATED Link", "https://google-world.com")?;
 
     let cells = [c1, c2, c3, c4, c5, c6, c7];
 

@@ -2,16 +2,12 @@
 #![warn(rust_2018_idioms)]
 
 use log::error;
-use serde_json::{json, to_string_pretty};
+use serde_json::to_string_pretty;
 use std::env;
 use std::io::{Error, ErrorKind};
-use std::ops::Deref;
 use std::time::Instant;
 
-use smartsheet_rs;
-use smartsheet_rs::models::CellValue::{Numeric, Text};
-use smartsheet_rs::models::{Cell, CellBuilder, LightPicker, Row, RowLocationSpecifier};
-use smartsheet_rs::ColumnMapper;
+use smartsheet_rs::SmartsheetApi;
 
 // A simple type alias so as to DRY.
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
@@ -37,7 +33,7 @@ async fn main() -> Result<()> {
 
     let sheet_id = fetch_args().await?;
 
-    let smart = smartsheet_rs::SmartsheetApi::from_env()?;
+    let smart = SmartsheetApi::from_env()?;
 
     // println!("Column Name to ID: {:#?}", cols.name_to_id);
 

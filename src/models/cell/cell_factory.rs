@@ -5,15 +5,15 @@ use crate::types::Result;
 use serde_json::{json, to_value};
 use std::io::{Error, ErrorKind};
 
-/// **Cell Builder** - Utility to make it easier to construct a `Cell` object,
+/// **Cell Factory** - Utility to make it easier to construct a `Cell` object,
 /// which is useful when adding or updating `Row`s in a `Sheet`.
 ///
-pub struct CellBuilder<'a> {
+pub struct CellFactory<'a> {
     name_to_id: &'a ColumnNameToId<'a>,
 }
 
-impl<'a> CellBuilder<'a> {
-    /// Create a new `CellBuilder` from a reference to a `ColumnMapper` object
+impl<'a> CellFactory<'a> {
+    /// Create a new `CellFactory` from a reference to a `ColumnMapper` object
     pub fn new(cols: &'a ColumnMapper) -> Self {
         Self {
             name_to_id: &cols.name_to_id,
@@ -21,9 +21,9 @@ impl<'a> CellBuilder<'a> {
     }
 
     // TODO: Consider maybe re-rewriting this into a macro.
-    pub fn new_cell<V: Into<CellValue>>(&'a self, column_name: &'a str, value: V) -> Result<Cell> {
+    pub fn cell<V: Into<CellValue>>(&'a self, column_name: &'a str, value: V) -> Result<Cell> {
         match self.name_to_id.get(column_name) {
-            Some(&column_id) => Ok(self.new_cell_with_id(column_id, value)),
+            Some(&column_id) => Ok(self.cell_with_id(column_id, value)),
             None => Err(Box::from(Error::new(
                 ErrorKind::NotFound,
                 format!(
@@ -34,7 +34,7 @@ impl<'a> CellBuilder<'a> {
         }
     }
 
-    pub fn new_cell_with_id<V: Into<CellValue>>(&'a self, column_id: u64, value: V) -> Cell {
+    pub fn cell_with_id<V: Into<CellValue>>(&'a self, column_id: u64, value: V) -> Cell {
         Cell {
             column_id,
             value: Some(value.into()),
@@ -42,16 +42,14 @@ impl<'a> CellBuilder<'a> {
         }
     }
 
-    pub fn new_url_hyperlink_cell(
+    pub fn url_hyperlink_cell(
         &'a self,
         column_name: &'a str,
         display_text: &'a str,
         url: &'a str,
     ) -> Result<Cell> {
         match self.name_to_id.get(column_name) {
-            Some(&column_id) => {
-                Ok(self.new_url_hyperlink_cell_with_id(column_id, display_text, url))
-            }
+            Some(&column_id) => Ok(self.url_hyperlink_cell_with_id(column_id, display_text, url)),
             None => Err(Box::from(Error::new(
                 ErrorKind::NotFound,
                 format!(
@@ -62,7 +60,7 @@ impl<'a> CellBuilder<'a> {
         }
     }
 
-    pub fn new_url_hyperlink_cell_with_id(
+    pub fn url_hyperlink_cell_with_id(
         &'a self,
         column_id: u64,
         display_text: &'a str,
@@ -76,13 +74,9 @@ impl<'a> CellBuilder<'a> {
         }
     }
 
-    pub fn new_multi_picklist_cell(
-        &'a self,
-        column_name: &'a str,
-        values: &[&'a str],
-    ) -> Result<Cell> {
+    pub fn multi_picklist_cell(&'a self, column_name: &'a str, values: &[&'a str]) -> Result<Cell> {
         match self.name_to_id.get(column_name) {
-            Some(&column_id) => Ok(self.new_multi_picklist_cell_with_id(column_id, values)),
+            Some(&column_id) => Ok(self.multi_picklist_cell_with_id(column_id, values)),
             None => Err(Box::from(Error::new(
                 ErrorKind::NotFound,
                 format!(
@@ -93,7 +87,7 @@ impl<'a> CellBuilder<'a> {
         }
     }
 
-    pub fn new_multi_picklist_cell_with_id(&'a self, column_id: u64, values: &[&'a str]) -> Cell {
+    pub fn multi_picklist_cell_with_id(&'a self, column_id: u64, values: &[&'a str]) -> Cell {
         Cell {
             column_id,
             object_value: Some(json!(
@@ -105,13 +99,13 @@ impl<'a> CellBuilder<'a> {
         }
     }
 
-    pub fn new_contact_cell(
+    pub fn contact_cell(
         &'a self,
         column_name: &'a str,
         contact: impl Into<Contact<'a>>,
     ) -> Result<Cell> {
         match self.name_to_id.get(column_name) {
-            Some(&column_id) => Ok(self.new_contact_cell_with_id(column_id, contact)),
+            Some(&column_id) => Ok(self.contact_cell_with_id(column_id, contact)),
             None => Err(Box::from(Error::new(
                 ErrorKind::NotFound,
                 format!(
@@ -122,11 +116,7 @@ impl<'a> CellBuilder<'a> {
         }
     }
 
-    pub fn new_contact_cell_with_id(
-        &'a self,
-        column_id: u64,
-        contact: impl Into<Contact<'a>>,
-    ) -> Cell {
+    pub fn contact_cell_with_id(&'a self, column_id: u64, contact: impl Into<Contact<'a>>) -> Cell {
         Cell {
             column_id,
             object_value: Some(to_value(contact.into()).unwrap()),
@@ -134,13 +124,13 @@ impl<'a> CellBuilder<'a> {
         }
     }
 
-    pub fn new_multi_contact_cell(
+    pub fn multi_contact_cell(
         &'a self,
         column_name: &'a str,
         contacts: &[Contact<'a>],
     ) -> Result<Cell> {
         match self.name_to_id.get(column_name) {
-            Some(&column_id) => Ok(self.new_multi_contact_cell_with_id(column_id, contacts)),
+            Some(&column_id) => Ok(self.multi_contact_cell_with_id(column_id, contacts)),
             None => Err(Box::from(Error::new(
                 ErrorKind::NotFound,
                 format!(
@@ -151,7 +141,7 @@ impl<'a> CellBuilder<'a> {
         }
     }
 
-    pub fn new_multi_contact_cell_with_id(
+    pub fn multi_contact_cell_with_id(
         &'a self,
         column_id: u64,
         contacts: &[Contact<'a>],
