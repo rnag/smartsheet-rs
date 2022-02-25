@@ -49,11 +49,11 @@ async fn main() -> Result<()> {
     let start = Instant::now();
 
     let target_level = Level::MultiPicklist;
-    let include = Some(vec![ColumnIncludeFlags::Filters]);
-    let include_all = Some(true);
+    let include = vec![ColumnIncludeFlags::Filters];
+    let include_all = true;
 
     let result = smart
-        .list_columns_with_params(sheet_id, Some(target_level), include, include_all)
+        .list_columns_with_params(sheet_id, target_level, include, include_all)
         .await?;
 
     println!(

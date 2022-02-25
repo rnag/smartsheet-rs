@@ -80,7 +80,7 @@ async fn main() -> Result<()> {
 
     // Get row data, and pass `include=columns` in the request
     let row = smart
-        .get_row_with_params(sheet_id, row_id, Some(include), Some(exclude), Some(level))
+        .get_row_with_params(sheet_id, row_id, include, exclude, level)
         .await?;
 
     println!("Get Row with Params completed in {:.2?}", start.elapsed());

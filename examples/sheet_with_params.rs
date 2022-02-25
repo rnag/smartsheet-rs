@@ -8,7 +8,7 @@ use std::time::Instant;
 
 use smartsheet_rs;
 use smartsheet_rs::models::{
-    Column, Row, RowExcludeFlags, RowIncludeFlags, SheetExcludeFlags, SheetIncludeFlags,
+    Column, Level, Row, RowExcludeFlags, RowIncludeFlags, SheetExcludeFlags, SheetIncludeFlags,
 };
 use smartsheet_rs::{CellGetter, ColumnMapper};
 
@@ -40,6 +40,7 @@ async fn main() -> Result<()> {
     let include = vec![
         SheetIncludeFlags::Base(RowIncludeFlags::Attachments),
         SheetIncludeFlags::Base(RowIncludeFlags::ColumnType),
+        SheetIncludeFlags::Base(RowIncludeFlags::ObjectValue),
         SheetIncludeFlags::OwnerInfo,
         SheetIncludeFlags::Source,
         SheetIncludeFlags::FilterDefinitions,
@@ -52,16 +53,10 @@ async fn main() -> Result<()> {
         SheetExcludeFlags::Base(RowExcludeFlags::LinkOutToCellDetails),
     ];
 
+    let level = Level::MultiPicklist;
+
     let sheet = smart
-        .get_sheet_with_params(
-            sheet_id,
-            Some(include),
-            Some(exclude),
-            None,
-            None,
-            None,
-            None,
-        )
+        .get_sheet_with_params(sheet_id, include, exclude, None, None, None, None, level)
         .await?;
 
     println!("Get Sheet With Params completed in {:.2?}", start.elapsed());
@@ -139,6 +134,9 @@ async fn print_column_names_and_cell_values(row: Option<&Row>, cols: &Vec<Column
                 println!("Display Value: {:#?}", display_value);
             } else {
                 println!("Display Value: {:?}", cell.display_value);
+            }
+            if let Some(obj_value) = &cell.object_value {
+                println!("Object Value: {}", serde_json::to_string_pretty(obj_value)?);
             }
 
             // Print out the cell link, if it's set
