@@ -90,7 +90,7 @@ async fn main() -> Result<()> {
     }
 
     // Uncomment to display the column name + values of each cell in the row
-    print_column_names_and_cell_values(first_row, &sheet.columns).await?;
+    // print_column_names_and_cell_values(first_row, &sheet.columns).await?;
 
     Ok(())
 }

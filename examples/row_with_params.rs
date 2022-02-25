@@ -136,7 +136,7 @@ async fn main() -> Result<()> {
     // print_column_name_to_cell(&row, _get_cell).await?;
 
     // Uncomment to display the column name + values of each cell in the row
-    print_column_names_and_cell_values(&row, &cols, _get_cell).await?;
+    // print_column_names_and_cell_values(&row, &cols, _get_cell).await?;
 
     Ok(())
 }

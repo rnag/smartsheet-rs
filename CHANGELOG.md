@@ -11,6 +11,16 @@ Possible header types:
 
 ## [Unreleased]
 
+## v0.4.0 (2022-02-25)
+
+### Features
+
+* Add `level` parameter to `get_sheet_with_params`, so it's possible to retrieve
+  the emails for `MULTI_CONTACT` cells, for example.
+* Change parameter definitions that use `Option<T>` to use `impl Into<Option<T>>` instead, so it's possible
+  for the user to just specify a `T` as an input.
+* Update badges used in the docs.
+
 ## v0.3.0 (2022-02-10)
 
 ### Features
