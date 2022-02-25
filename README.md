@@ -96,7 +96,7 @@ with the Smartsheet API.
 
 #### Retrieve Cells
 
-To retrieve an individual cell from a row by its associated *Column Id*, you can simply use `Row::get_cell_by_id`.
+To retrieve an individual cell from a row by its associated *column id*, you can simply use `Row::get_cell_by_id`.
 
 To instead retrieve a single `Cell` by its *column name*, you can first 
 build out a mapping of *Column Name to Id* with a `ColumnMapper`, and then
@@ -141,7 +141,7 @@ async fn main() -> Result<()> {
 ```
 
 The `CellGetter::by_name` method works by iterating over each cell in the row,
-and then returning the first `Cell` where the *column ID* for the cell
+and then returning the first `Cell` where the *Column Id* for the cell
 matches the specified *column name*.
 
 If the need arises to retrieve *multiple* `Cell` objects from a `Row` by their column names,
