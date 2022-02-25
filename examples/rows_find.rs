@@ -1,11 +1,12 @@
-use log::error;
-use serde_json::to_string_pretty;
-use smartsheet_rs::helpers::RowGetter;
 use smartsheet_rs::models::Row;
-use smartsheet_rs::{CellGetter, ColumnMapper, SmartsheetApi};
+use smartsheet_rs::{CellGetter, ColumnMapper, RowGetter, SmartsheetApi};
+
 use std::env;
 use std::io::{Error, ErrorKind};
 use std::time::Instant;
+
+use log::error;
+use serde_json::to_string_pretty;
 
 // A simple type alias so as to DRY.
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;

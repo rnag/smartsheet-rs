@@ -1,5 +1,4 @@
 mod cell;
-mod cell_factory;
 mod contact;
 mod decision;
 mod hyperlink;
@@ -9,7 +8,6 @@ mod object_type;
 mod value;
 
 pub use self::cell::*;
-pub use self::cell_factory::*;
 pub use self::contact::*;
 pub use self::decision::*;
 pub use self::hyperlink::*;

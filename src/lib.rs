@@ -106,13 +106,14 @@ mod log {
 }
 
 pub use api::SmartsheetApi;
-pub use helpers::{CellGetter, ColumnMapper};
+pub use cell_factory::CellFactory;
+pub use helpers::{CellGetter, ColumnMapper, RowGetter};
 
 mod api;
 pub mod auth;
 pub mod builders;
+mod cell_factory;
 pub mod constants;
-mod env;
 pub mod helpers;
 mod https;
 pub mod models;

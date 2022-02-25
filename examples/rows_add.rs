@@ -1,16 +1,16 @@
 #![allow(warnings)]
 #![warn(rust_2018_idioms)]
 
-use log::error;
-use serde_json::{json, to_string_pretty};
+use smartsheet_rs::models::CellValue::{Numeric, Text};
+use smartsheet_rs::models::{Cell, Contact, LightPicker, Row, RowLocationSpecifier};
+use smartsheet_rs::{CellFactory, ColumnMapper, SmartsheetApi};
+
 use std::env;
 use std::io::{Error, ErrorKind};
 use std::time::Instant;
 
-use smartsheet_rs;
-use smartsheet_rs::models::CellValue::{Numeric, Text};
-use smartsheet_rs::models::{Cell, CellFactory, Contact, LightPicker, Row, RowLocationSpecifier};
-use smartsheet_rs::ColumnMapper;
+use log::error;
+use serde_json::{json, to_string_pretty};
 
 // A simple type alias so as to DRY.
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
@@ -33,7 +33,7 @@ async fn main() -> Result<()> {
 
     let sheet_id = fetch_args().await?;
 
-    let smart = smartsheet_rs::SmartsheetApi::from_env()?;
+    let smart = SmartsheetApi::from_env()?;
 
     let index_result = smart.list_columns(sheet_id).await?;
 

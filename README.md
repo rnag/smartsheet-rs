@@ -17,6 +17,11 @@ this crate.
 * [Getting Started](#getting-started)
 * [Implemented Methods](#implemented-methods)
 * [A Larger Example](#a-larger-example)
+  * [Cells](#cells)
+    * [Retrieve Cells](#retrieve-cells) 
+  * [Rows](#rows)
+    * [Retrieve Rows](#retrieve-rows)
+    * [Create Rows](#create-rows)
 * [Dependencies and Features](#dependencies-and-features)
 * [Contributing](#contributing)
 * [License](#license)
@@ -84,8 +89,18 @@ rather than their title or *column name*.
 However, as humans it's much more natural and convenient to refer to *column names*
 when working with the data.
 Towards that end, the **smartsheet-rs** crate provides helper *struct* implementations
-such as the `ColumnMapper` and `CellGetter` in order to simplify interaction
+such as the `ColumnMapper`, `CellGetter`, and `RowFinder` in order to simplify interaction
 with the Smartsheet API.
+
+### Cells
+
+#### Retrieve Cells
+
+To retrieve an individual `Cell` from a `Row` by its associated *Column Id*, you can simply use `Row::get_cell_by_id`.
+
+To instead retrieve a single `Cell` by its *column name*, you can first 
+build out a mapping of *Column Name to Id* with a `ColumnMapper`, and then
+pair that with `CellGetter` in order to retrieve a Cell from a Row.
 
 Here's a quick example of how that would work:
 
@@ -143,6 +158,121 @@ println!("{:#?}", column_name_to_cell);
 //     "Column 1": Cell {...},
 //     "Column 2": Cell {...},
 //      ...
+```
+
+### Rows
+
+#### Retrieve Rows
+
+To find one or more `Row`s from a list that match a specified condition, you can use the `RowGetter` helper
+to make the task much more convenient.
+
+Here's a simple example to find the **first** `Row` where a `Cell` from a column has a particular value, and find
+**all** `Row`s where  a `Cell` from a column does *not* have a specified value.
+
+```rust
+use serde_json::to_string_pretty;
+use smartsheet_rs::{ColumnMapper, RowGetter, SmartsheetApi};
+
+// TODO update these values as needed
+const SHEET_ID: u64 = 1234567890;
+
+// A simple type alias so as to DRY.
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let smart = SmartsheetApi::from_env()?;
+
+    let sheet = smart.get_sheet(SHEET_ID).await?;
+    let cols = ColumnMapper::new(&sheet.columns);
+
+    // Create a `RowGetter` helper to find rows in a sheet by a condition
+    // based on a *Column Name* and *Column Value*.
+    let get_row = RowGetter::new(&sheet.rows, &cols);
+
+    let row = get_row
+        // Note: "My Value" can be either a String, Number, or Boolean.
+        .where_eq("Column 1", "My Value")?
+        // Normally you could use `.first()?` here if you were certain about
+        // finding it, but for example purposes, let's try to set a default
+        // otherwise.
+        .first()?;
+
+    let rows = get_row
+        .where_ne("Column 2", 123.45)?
+        // Retrieve *all* rows that *do not* match the specified cell value.
+        .find_all()?;
+
+    // Print the match for the first query
+    println!("Here's the first result: {:#?}", *row);
+
+    // Print the list of rows that match the second query
+    println!("Found {} Rows that match the second condition:", rows.len());
+    println!("{}", to_string_pretty(&rows)?);
+
+    Ok(())
+}
+```
+
+#### Create Rows
+
+To add or update rows, it's necessary to build out a list of `Cell`s to update the
+values for, and then add the cells to the row.
+
+Note that to *add* rows, we need to pass in a [location-specifier](https://smartsheet.redoc.ly/#section/Specify-Row-Location) attribute.
+To *update* rows, we only need to set the *Row Id* for each row.
+
+The helper *struct* `CellFactory` can be used to construct `Cell` objects to add to a `Row`.
+
+An example of *adding* a new `Row` to a sheet is shown below. Here we set the location specifier
+`to_top` to send the new row to the top of the sheet.
+
+```rust
+use serde_json::to_string_pretty;
+use smartsheet_rs::models::{Decision, LightPicker, Row, RowLocationSpecifier};
+use smartsheet_rs::{CellFactory, ColumnMapper, SmartsheetApi};
+
+// TODO update these values as needed
+const SHEET_ID: u64 = 1234567890;
+
+// A simple type alias so as to DRY.
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let smart = SmartsheetApi::from_env()?;
+
+    let index_result = smart.list_columns(SHEET_ID).await?;
+    let cols = ColumnMapper::new(&index_result.data);
+
+    // Create a `CellFactory` helper to build out a list of cells to create
+    // a `Row` from.
+    let make = CellFactory::new(&cols);
+
+    // Create the `Cell` objects to add here.
+    let cells = [
+        make.cell("Text/Number Column", 123.45)?,
+        make.cell("Symbol Column #1", LightPicker::Yellow)?,
+        make.cell("Symbol Column #2", Decision::Hold)?,
+        make.cell("Checkbox Column", true)?,
+        make.contact_cell("Assigned To", "user2.email@smartsheet.com")?,
+        make.url_hyperlink_cell("Link to Page", "Rust Homepage", "https://rust-lang.org")?,
+        make.multi_picklist_cell(
+            "Multi Dropdown Column",
+            &["Hello, world!", "Testing", "1 2 3"],
+        )?,
+    ];
+
+    // Create a new `Row` from the list of `Cell` objects.
+    let row_to_add = Row::from(&cells);
+    println!("Input Object: {}", to_string_pretty(&row_to_add)?);
+    
+    // Add the Rows to the Sheet
+    let _ = smart.add_rows(SHEET_ID, [row_to_add].to_top(true)).await?;
+
+    Ok(())
+}
 ```
 
 ## Dependencies and Features

@@ -1,13 +1,14 @@
 #![allow(warnings)]
 #![warn(rust_2018_idioms)]
 
-use log::error;
-use serde_json::to_string_pretty;
+use smartsheet_rs::SmartsheetApi;
+
 use std::env;
 use std::io::{Error, ErrorKind};
 use std::time::Instant;
 
-use smartsheet_rs::SmartsheetApi;
+use log::error;
+use serde_json::to_string_pretty;
 
 // A simple type alias so as to DRY.
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
