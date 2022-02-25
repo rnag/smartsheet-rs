@@ -83,6 +83,15 @@ pub struct Row {
     /// Sheet version number that is incremented every time a sheet is modified.
     #[serde(skip_serializing)]
     pub version: Option<u64>,
+    // TODO: Add Proof field
+    // Proof Object
+    // pub proofs: Proofs
+    /// # Note
+    ///
+    /// The following are used in the [Row Location] specified attributes.
+    ///
+    /// [Row Location]: https://smartsheet.redoc.ly/#section/Specify-Row-Location
+
     /// Sibling Row Id
     ///
     /// Also used to [specify row location] when adding/updating rows.
@@ -112,9 +121,6 @@ pub struct Row {
     #[serde(skip_deserializing)]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub outdent: Option<IndentEnabled>,
-    // TODO: Add Proof field
-    // Proof Object
-    // pub proofs: Proofs
 }
 
 impl<const N: usize> From<&[Cell; N]> for Row {
@@ -163,13 +169,91 @@ impl Row {
             "No cell found for the given Column ID or Name",
         )))
     }
+
+    /// Fluent setter for the `expanded` attribute
+    pub fn expanded<B: Into<Option<bool>>>(mut self, expanded: B) -> Self {
+        self.expanded = expanded.into();
+        self
+    }
+
+    /// Fluent setter for the `format` attribute
+    pub fn format<S: Into<String>>(mut self, format: S) -> Self {
+        self.format = Some(format.into());
+        self
+    }
+
+    /// Fluent setter for the `locked` attribute
+    pub fn locked<B: Into<Option<bool>>>(mut self, locked: B) -> Self {
+        self.locked = locked.into();
+        self
+    }
+
+    /// Fluent setter for the `sibling_id` attribute
+    pub fn sibling_id<U: Into<Option<u64>>>(mut self, sibling_id: U) -> Self {
+        self.sibling_id = sibling_id.into();
+        self
+    }
+
+    /// Fluent setter for the `parent_id` attribute
+    pub fn parent_id<U: Into<Option<u64>>>(mut self, parent_id: U) -> Self {
+        self.parent_id = parent_id.into();
+        self
+    }
+
+    /// Fluent setter for the `to_top` attribute
+    pub fn to_top<B: Into<Option<bool>>>(mut self, to_top: B) -> Self {
+        self.to_top = to_top.into();
+        self
+    }
+
+    /// Fluent setter for the `to_bottom` attribute
+    pub fn to_bottom<B: Into<Option<bool>>>(mut self, to_bottom: B) -> Self {
+        self.to_bottom = to_bottom.into();
+        self
+    }
+
+    /// Fluent setter for the `indent` attribute
+    pub fn indent<I: Into<Option<IndentEnabled>>>(mut self, indent: I) -> Self {
+        self.indent = indent.into();
+        self
+    }
+
+    /// Fluent setter for the `outdent` attribute
+    pub fn outdent<I: Into<Option<IndentEnabled>>>(mut self, outdent: I) -> Self {
+        self.outdent = outdent.into();
+        self
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use indoc::indoc;
     use serde_json::to_string_pretty;
 
+    #[test]
+    fn test_expanded() {
+        let row = Row::default();
+        assert_eq!(row.expanded, None);
+
+        let row = row.expanded(true);
+
+        assert_eq!(row.expanded, Some(true));
+    }
+
+    #[test]
+    fn test_format() {
+        let row = Row::default();
+        assert_eq!(row.format, None);
+
+        let row = row.format("test");
+        assert_eq!(row.format, Some("test".to_owned()));
+    }
+
+    /// Test that only the [required fields] are populated when serializing
+    /// a `Row` object.
+    ///
+    /// [required fields]: https://smartsheet.redoc.ly/#tag/rows
     #[test]
     fn test_serialize_row() {
         let row = Row {
@@ -204,12 +288,34 @@ mod tests {
             parent_id: Some(321),
             to_top: Some(true),
             to_bottom: Some(true),
-            indent: None,
+            indent: Some(IndentEnabled::TRUE),
             outdent: Some(IndentEnabled::TRUE),
         };
 
         let s = to_string_pretty(&row).unwrap();
 
         println!("{}", s);
+
+        assert_eq!(
+            s,
+            indoc!(
+                r#"
+            {
+              "id": 123,
+              "cells": [],
+              "expanded": false,
+              "format": "my fmt",
+              "locked": false,
+              "siblingId": 123,
+              "parentId": 321,
+              "toTop": true,
+              "toBottom": true,
+              "indent": 1,
+              "outdent": 1
+            }
+                "#
+            )
+            .trim()
+        )
     }
 }
