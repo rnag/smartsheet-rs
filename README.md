@@ -74,8 +74,11 @@ have been implemented currently:
 - [List Sheets](https://smartsheet-platform.github.io/api-docs/#list-sheets)
 - [List Columns](https://smartsheet-platform.github.io/api-docs/#list-columns)
 - [Get Sheet](https://smartsheet-platform.github.io/api-docs/#get-sheet)
-- [Get Row](https://smartsheet-platform.github.io/api-docs/#get-row)
 - [Get Column](https://smartsheet-platform.github.io/api-docs/#get-column)
+- [Get Row](https://smartsheet-platform.github.io/api-docs/#get-row)
+- [Add Rows](https://smartsheet-platform.github.io/api-docs/#add-rows)
+- [Update Rows](https://smartsheet-platform.github.io/api-docs/#update-rows)
+- [Delete Rows](https://smartsheet-platform.github.io/api-docs/#delete-rows)
 
 You can check out sample usage of these API methods in the [examples/](https://github.com/rnag/smartsheet-rs/tree/main/examples)
 folder in the project repo on GitHub.

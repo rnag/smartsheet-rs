@@ -167,15 +167,13 @@ impl Row {
 
     /// Retrieve a specified `Cell` - for a given *column id* - from the `Row`
     pub fn get_cell_by_id(&self, column_id: u64) -> Result<&Cell> {
-        for cell in &self.cells {
-            if cell.column_id == column_id {
-                return Ok(cell);
-            }
-        }
-        Err(Box::from(Error::new(
-            ErrorKind::NotFound,
-            "No cell found for the given Column ID or Name",
-        )))
+        return match self.cells.iter().find(|cell| cell.column_id == column_id) {
+            Some(cell) => Ok(cell),
+            None => Err(Box::from(Error::new(
+                ErrorKind::NotFound,
+                "No cell found for the given Column ID or Name",
+            ))),
+        };
     }
 
     /// Fluent setter for the `id` attribute (Row Id)

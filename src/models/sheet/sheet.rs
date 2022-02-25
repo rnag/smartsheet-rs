@@ -1,7 +1,11 @@
 use crate::models::{
     Column, Filter, GanttConfig, Row, Source, UserPermissions, UserSettings, Workspace,
 };
+use crate::types::Result;
+
 use core::option::Option;
+use std::io::{Error, ErrorKind};
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -58,4 +62,17 @@ pub struct Sheet {
     pub user_settings: UserSettings,
     #[serde(rename = "workspace")]
     pub workspace: Option<Workspace>,
+}
+
+impl Sheet {
+    /// Retrieve a specified `Row` - for a given *row id* - from the `Sheet`
+    pub fn get_row_by_id(&self, row_id: u64) -> Result<&Row> {
+        return match self.rows.iter().find(|row| row.id == row_id) {
+            Some(row) => Ok(row),
+            None => Err(Box::from(Error::new(
+                ErrorKind::NotFound,
+                "No row found for the given Row ID",
+            ))),
+        };
+    }
 }

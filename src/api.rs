@@ -612,16 +612,17 @@ impl<'a> SmartsheetApi<'a> {
         let result = self.list_sheets_with_params(None, Some(true), None).await?;
 
         // Find the sheet by the provided name
-        for sheet in result.data {
-            if sheet.name == sheet_name {
-                return Ok(sheet);
-            }
-        }
-
-        Err(Box::from(Error::new(
-            ErrorKind::NotFound,
-            format!("The provided sheet `{}` was not found", sheet_name),
-        )))
+        return match result
+            .data
+            .into_iter()
+            .find(|sheet| sheet.name == sheet_name)
+        {
+            Some(sheet) => Ok(sheet),
+            None => Err(Box::from(Error::new(
+                ErrorKind::NotFound,
+                format!("The provided sheet `{}` was not found", sheet_name),
+            ))),
+        };
     }
 
     /// **Get Column By Title** - Convenience function to retrieve a specified
@@ -660,15 +661,16 @@ impl<'a> SmartsheetApi<'a> {
             .await?;
 
         // Find the column by the provided name
-        for column in result.data {
-            if column.title == column_title {
-                return Ok(column);
-            }
-        }
-
-        Err(Box::from(Error::new(
-            ErrorKind::NotFound,
-            format!("The provided column `{}` was not found", column_title),
-        )))
+        return match result
+            .data
+            .into_iter()
+            .find(|column| column.title == column_title)
+        {
+            Some(column) => Ok(column),
+            None => Err(Box::from(Error::new(
+                ErrorKind::NotFound,
+                format!("The provided column `{}` was not found", column_title),
+            ))),
+        };
     }
 }

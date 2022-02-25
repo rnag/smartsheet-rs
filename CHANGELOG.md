@@ -11,6 +11,15 @@ Possible header types:
 
 ## [Unreleased]
 
+## v0.50 (2022-02-25)
+
+### Features
+* Add `Sheet::get_row_by_id`
+* Add support for the following API methods:
+  - [Add Rows](https://smartsheet-platform.github.io/api-docs/#add-rows)
+  - [Update Rows](https://smartsheet-platform.github.io/api-docs/#update-rows)
+  - [Delete Rows](https://smartsheet-platform.github.io/api-docs/#delete-rows)
+
 ## v0.4.0 (2022-02-25)
 
 ### Features
