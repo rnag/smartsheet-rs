@@ -9,7 +9,7 @@ use std::time::Instant;
 
 use smartsheet_rs;
 use smartsheet_rs::models::CellValue::{Numeric, Text};
-use smartsheet_rs::models::{Cell, CellBuilder, LightPicker, Row, RowLocationSpecifier};
+use smartsheet_rs::models::{Cell, CellBuilder, Contact, LightPicker, Row, RowLocationSpecifier};
 use smartsheet_rs::ColumnMapper;
 
 // A simple type alias so as to DRY.
@@ -48,24 +48,25 @@ async fn main() -> Result<()> {
 
     // Column 1 - Type: TEXT / NUMBER
     let mut c1 = make
-        .new_cell("COLUMN 1", "My Test Value")?
+        .new_cell("Primary Column", "My Test Value")?
+        // This disables validation in the case of a dropdown, so it's not ideal.
         .with_strict(false);
 
     // Column 2 - Type: TEXT / NUMBER
-    let c2 = make.new_cell("COLUMN 2", 123.45)?;
+    let c2 = make.new_cell("Column2", 123.45)?;
 
     // Column 3 - Type: SYMBOLS -> LIGHT PICKER (Red, Yellow, Green, Blue, Gray)
-    let c3 = make.new_cell("COLUMN 3", LightPicker::Yellow)?;
+    let c3 = make.new_cell("Column3", LightPicker::Yellow)?;
 
     // Column 4 - Type: CHECKBOX *or* SYMBOLS -> STAR/FLAG
-    let c4 = make.new_cell("COLUMN 4", true)?;
+    let c4 = make.new_cell("Column4", true)?;
 
     // Column 5 - Type: DROPDOWN (MULTI SELECT)
-    let c5 = make.new_multi_picklist_cell("COLUMN 5", &["One", "Two", "Hey, world!"])?;
+    let c5 = make.new_multi_picklist_cell("Column5", &["One", "Two", "Hello, world!"])?;
 
     // Here's the *hard* way to achieve the above:
     // let c5 = Cell {
-    //     column_id: cols.name_to_id["COLUMN 5"],
+    //     column_id: cols.name_to_id["Column5"],
     //     object_value: Some(
     //         json!({"objectType": "MULTI_PICKLIST", "values": ["One", "Two", "Hello, world!"]}),
     //     ),
@@ -74,13 +75,16 @@ async fn main() -> Result<()> {
 
     // Column 6 - Type: CONTACT LIST (MULTI SELECT)
     let c6 = make.new_multi_contact_cell(
-        "COLUMN 6",
-        &["user1.email@smartsheet.com", "user2.email@smartsheet.com"],
+        "Column6",
+        &[
+            Contact::from("user1.email@smartsheet.com").name("Contact Name"),
+            "user2.email@smartsheet.com".into(),
+        ],
     )?;
 
     // Again, here's the *hard* way to achieve the above:
     // let c6 = Cell {
-    //     column_id: cols.name_to_id["COLUMN 6"],
+    //     column_id: cols.name_to_id["Column6"],
     //     object_value: Some(json!(
     //     {"objectType": "MULTI_CONTACT",
     //     "values": [
@@ -91,7 +95,7 @@ async fn main() -> Result<()> {
     // };
 
     // Column 7 - Type: HYPERLINK, /w URL
-    let c7 = make.new_url_hyperlink_cell("COLUMN 7", "My Link", "https://google.com")?;
+    let c7 = make.new_url_hyperlink_cell("Column7", "My Link", "https://google.com")?;
 
     let cells = [c1, c2, c3, c4, c5, c6, c7];
 

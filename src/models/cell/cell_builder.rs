@@ -1,8 +1,8 @@
 use crate::helpers::{ColumnMapper, ColumnNameToId};
-use crate::models::{Cell, CellValue, Hyperlink, ObjectType};
+use crate::models::{Cell, CellValue, Contact, Hyperlink, ObjectType};
 use crate::types::Result;
 
-use serde_json::json;
+use serde_json::{json, to_value};
 use std::io::{Error, ErrorKind};
 
 /// **Cell Builder** - Utility to make it easier to construct a `Cell` object,
@@ -105,13 +105,13 @@ impl<'a> CellBuilder<'a> {
         }
     }
 
-    pub fn new_multi_contact_cell(
+    pub fn new_contact_cell(
         &'a self,
         column_name: &'a str,
-        emails: &[&'a str],
+        contact: impl Into<Contact<'a>>,
     ) -> Result<Cell> {
         match self.name_to_id.get(column_name) {
-            Some(&column_id) => Ok(self.new_multi_contact_cell_with_id(column_id, emails)),
+            Some(&column_id) => Ok(self.new_contact_cell_with_id(column_id, contact)),
             None => Err(Box::from(Error::new(
                 ErrorKind::NotFound,
                 format!(
@@ -122,17 +122,44 @@ impl<'a> CellBuilder<'a> {
         }
     }
 
-    pub fn new_multi_contact_cell_with_id(&'a self, column_id: u64, emails: &[&'a str]) -> Cell {
-        let values: Vec<_> = emails
-            .iter()
-            .map(|email| {
-                json!(
-                {
-                    "objectType": "CONTACT",
-                    "email": email
-                })
-            })
-            .collect();
+    pub fn new_contact_cell_with_id(
+        &'a self,
+        column_id: u64,
+        contact: impl Into<Contact<'a>>,
+    ) -> Cell {
+        Cell {
+            column_id,
+            object_value: Some(to_value(contact.into()).unwrap()),
+            ..Default::default()
+        }
+    }
+
+    pub fn new_multi_contact_cell(
+        &'a self,
+        column_name: &'a str,
+        contacts: &[Contact<'a>],
+    ) -> Result<Cell> {
+        match self.name_to_id.get(column_name) {
+            Some(&column_id) => Ok(self.new_multi_contact_cell_with_id(column_id, contacts)),
+            None => Err(Box::from(Error::new(
+                ErrorKind::NotFound,
+                format!(
+                    "The column name `{}` does not exist in the sheet",
+                    column_name
+                ),
+            ))),
+        }
+    }
+
+    pub fn new_multi_contact_cell_with_id(
+        &'a self,
+        column_id: u64,
+        contacts: &[Contact<'a>],
+        // TODO I can't get this to WORK!! spent too long on it.
+        // contacts: &[impl Into<Contact<'a>>],
+    ) -> Cell {
+        // let c: Vec<Contact<'a>> = contacts.into_iter().map(|c| c.into()).collect();
+        let values = to_value(contacts).unwrap();
 
         Cell {
             column_id,

@@ -1,5 +1,6 @@
 mod cell;
 mod cell_builder;
+mod contact;
 mod decision;
 mod hyperlink;
 mod image;
@@ -9,6 +10,7 @@ mod value;
 
 pub use self::cell::*;
 pub use self::cell_builder::*;
+pub use self::contact::*;
 pub use self::decision::*;
 pub use self::hyperlink::*;
 pub use self::image::*;

@@ -16,7 +16,8 @@ use smartsheet_rs::ColumnMapper;
 // A simple type alias so as to DRY.
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
-const ROW_IDS: [u64; 2] = [7137547323893636, 1508047789680516];
+// TODO Update these as needed
+const ROW_IDS: [u64; 2] = [3337773114124164, 7841372741494660];
 
 async fn fetch_args() -> Result<u64> {
     // Some simple CLI args requirements...
@@ -50,25 +51,28 @@ async fn main() -> Result<()> {
     let start = Instant::now();
 
     // Column 1 - Type: TEXT / NUMBER
-    let mut c1 = make.new_cell("COLUMN 1", "New Value")?.with_strict(false);
+    let mut c1 = make
+        .new_cell("Primary Column", "New Value")?
+        // This disables validation in the case of a dropdown, so it's not ideal.
+        .with_strict(false);
 
     // Column 2 - Type: TEXT / NUMBER
-    let c2 = make.new_cell("COLUMN 2", "")?;
+    let c2 = make.new_cell("Column2", "")?;
 
     // Column 3 - Type: SYMBOLS -> LIGHT PICKER (Red, Yellow, Green, Blue, Gray)
-    let c3 = make.new_cell("COLUMN 3", LightPicker::Green)?;
+    let c3 = make.new_cell("Column3", LightPicker::Green)?;
 
     // Column 4 - Type: CHECKBOX *or* SYMBOLS -> STAR/FLAG
-    let c4 = make.new_cell("COLUMN 4", false)?;
+    let c4 = make.new_cell("Column4", false)?;
 
     // Column 5 - Type: DROPDOWN (MULTI SELECT)
-    let c5 = make.new_multi_picklist_cell("COLUMN 5", &["Three...", "Two...", "And ONE"])?;
+    let c5 = make.new_multi_picklist_cell("Column5", &["Three...", "Two...", "And ONE"])?;
 
     // Column 6 - Type: CONTACT LIST (MULTI SELECT)
-    let c6 = make.new_multi_contact_cell("COLUMN 6", &["abc@xyz.org"])?;
+    let c6 = make.new_multi_contact_cell("Column6", &["abc@xyz.org".into()])?;
 
     // Column 7 - Type: HYPERLINK, /w URL
-    let c7 = make.new_url_hyperlink_cell("COLUMN 7", "UPDATED Link", "https://google-world.com")?;
+    let c7 = make.new_url_hyperlink_cell("Column7", "UPDATED Link", "https://google-world.com")?;
 
     let cells = [c1, c2, c3, c4, c5, c6, c7];
 
