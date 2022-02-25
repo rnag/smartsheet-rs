@@ -15,7 +15,7 @@ use std::time::Instant;
 
 use hyper::client::HttpConnector;
 use hyper::header::AUTHORIZATION;
-use hyper::{Body, Client, Request};
+use hyper::{Body, Client, Method, Request};
 
 /// Client implementation for making requests to the *Smartsheet
 /// API v2*
@@ -308,19 +308,60 @@ impl<'a> SmartsheetApi<'a> {
         Ok(row)
     }
 
-    pub async fn add_row(&self, sheet_id: u64, row: Row) -> Result<AddRowResult> {
-        self.add_row_with_params(sheet_id, row, None, None).await
+    pub async fn add_rows(&self, sheet_id: u64, rows: impl Into<Vec<Row>>) -> Result<RowResult> {
+        self.add_rows_with_params(sheet_id, rows, None, None).await
     }
 
     /// allowPartialSuccess - Default: False. When specified with a value of true, enables partial success for this bulk operation. See Partial Success for more information
     /// overrideValidation - Default: False. You may use the query string parameter overrideValidation with a value of true to allow a cell value outside of the validation limits. You must specify strict with a value of false to bypass value type checking.
-    pub async fn add_row_with_params(
+    pub async fn add_rows_with_params(
         &self,
         sheet_id: u64,
-        row: Row,
+        rows: impl Into<Vec<Row>>,
+        allow_partial_success: impl Into<Option<bool>>,
+        override_validation: impl Into<Option<bool>>,
+    ) -> Result<RowResult> {
+        self.add_or_update_rows(
+            Method::POST,
+            sheet_id,
+            rows,
+            allow_partial_success.into(),
+            override_validation.into(),
+        )
+        .await
+    }
+
+    pub async fn update_rows(&self, sheet_id: u64, rows: impl Into<Vec<Row>>) -> Result<RowResult> {
+        self.update_rows_with_params(sheet_id, rows, None, None)
+            .await
+    }
+
+    pub async fn update_rows_with_params(
+        &self,
+        sheet_id: u64,
+        rows: impl Into<Vec<Row>>,
+        allow_partial_success: impl Into<Option<bool>>,
+        override_validation: impl Into<Option<bool>>,
+    ) -> Result<RowResult> {
+        self.add_or_update_rows(
+            Method::PUT,
+            sheet_id,
+            rows,
+            allow_partial_success.into(),
+            override_validation.into(),
+        )
+        .await
+    }
+
+    pub(crate) async fn add_or_update_rows(
+        &self,
+        method: hyper::Method,
+        sheet_id: u64,
+        rows: impl Into<Vec<Row>>,
         allow_partial_success: Option<bool>,
         override_validation: Option<bool>,
-    ) -> Result<AddRowResult> {
+    ) -> Result<RowResult> {
+        // The endpoint to ADD or UPDATE rows is the same.
         let mut url: String = format!("{}/{}/{}/{}", self.endpoint, "sheets", sheet_id, "rows");
 
         ParamBuilder::new(&mut url)
@@ -330,11 +371,11 @@ impl<'a> SmartsheetApi<'a> {
 
         debug!("URL: {}", url);
 
-        let start = Instant::now();
-        let data = serde_json::to_vec(&row)?;
-        debug!("Deserialize 1: {:?}", start.elapsed());
+        let data = serde_json::to_vec(&rows.into())?;
 
-        let req = Request::post(&url)
+        let req = Request::builder()
+            .method(method)
+            .uri(&url)
             .header(AUTHORIZATION, &self.bearer_token)
             .body(Body::from(data))?;
 
@@ -344,11 +385,11 @@ impl<'a> SmartsheetApi<'a> {
         let start = Instant::now();
 
         // asynchronously aggregate the chunks of the body
-        let row = into_struct_from_slice(res).await?;
+        let result = into_struct_from_slice(res).await?;
 
         debug!("Deserialize: {:?}", start.elapsed());
 
-        Ok(row)
+        Ok(result)
     }
 
     /// **List Columns** - Gets a list of all columns belonging to the specified sheet.

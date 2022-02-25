@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize, Serializer};
 /// See [Specify Row Location] for more details.
 ///
 /// [Specify Row Location]: https://smartsheet.redoc.ly/#section/Specify-Row-Location
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Deserialize)]
 pub enum IndentEnabled {
     TRUE = 1,
 }

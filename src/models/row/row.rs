@@ -157,6 +157,14 @@ impl Row {
         }
     }
 
+    pub fn with_id_and_cells_slice<const N: usize>(row_id: u64, cells: &[Cell; N]) -> Self {
+        Row {
+            id: row_id,
+            cells: cells.to_vec(),
+            ..Default::default()
+        }
+    }
+
     /// Retrieve a specified `Cell` - for a given *column id* - from the `Row`
     pub fn get_cell_by_id(&self, column_id: u64) -> Result<&Cell> {
         for cell in &self.cells {
@@ -168,6 +176,12 @@ impl Row {
             ErrorKind::NotFound,
             "No cell found for the given Column ID or Name",
         )))
+    }
+
+    /// Fluent setter for the `id` attribute (Row Id)
+    pub fn id(mut self, id: u64) -> Self {
+        self.id = id;
+        self
     }
 
     /// Fluent setter for the `expanded` attribute
@@ -224,6 +238,90 @@ impl Row {
         self
     }
 }
+
+impl From<Row> for Vec<Row> {
+    /// Useful when adding / updating row(s) to a sheet.
+    fn from(row: Row) -> Self {
+        vec![row]
+    }
+}
+
+/// *Row Location Specifier* - A trait which allows us to define the
+/// [Row Location] specified attributes for a collection (array or vector) of
+/// `Row` objects.
+///
+/// [Row Location]: https://smartsheet.redoc.ly/#section/Specify-Row-Location
+pub trait RowLocationSpecifier {
+    /// Fluent setter for the `sibling_id` attribute
+    fn sibling_id<U: Into<Option<u64>>>(&mut self, sibling_id: U) -> &mut Self;
+    /// Fluent setter for the `parent_id` attribute
+    fn parent_id<U: Into<Option<u64>>>(&mut self, parent_id: U) -> &mut Self;
+    /// Fluent setter for the `to_top` attribute
+    fn to_top<B: Into<Option<bool>>>(&mut self, to_top: B) -> &mut Self;
+    /// Fluent setter for the `to_bottom` attribute
+    fn to_bottom<B: Into<Option<bool>>>(&mut self, to_bottom: B) -> &mut Self;
+    /// Fluent setter for the `indent` attribute
+    fn indent<I: Into<Option<IndentEnabled>>>(&mut self, indent: I) -> &mut Self;
+    /// Fluent setter for the `outdent` attribute
+    fn outdent<I: Into<Option<IndentEnabled>>>(&mut self, outdent: I) -> &mut Self;
+}
+
+macro_rules! impl_row_location_specifier {
+    (for $($t:ty),+) => {
+        $(impl RowLocationSpecifier for $t {
+
+            fn sibling_id<U: Into<Option<u64>>>(&mut self, sibling_id: U) -> &mut Self {
+                let sibling_id = sibling_id.into();
+                for row in self.iter_mut() {
+                    row.sibling_id = sibling_id;
+                }
+                self
+            }
+
+            fn parent_id<U: Into<Option<u64>>>(&mut self, parent_id: U) -> &mut Self {
+                let parent_id = parent_id.into();
+                for row in self.iter_mut() {
+                    row.parent_id = parent_id;
+                }
+                self
+            }
+
+            fn to_top<B: Into<Option<bool>>>(&mut self, to_top: B) -> &mut Self {
+                let to_top = to_top.into();
+                for row in self.iter_mut() {
+                    row.to_top = to_top;
+                }
+                self
+            }
+
+            fn to_bottom<B: Into<Option<bool>>>(&mut self, to_bottom: B) -> &mut Self {
+                let to_bottom = to_bottom.into();
+                for row in self.iter_mut() {
+                    row.to_bottom = to_bottom;
+                }
+                self
+            }
+
+            fn indent<I: Into<Option<IndentEnabled>>>(&mut self, indent: I) -> &mut Self {
+                let indent = indent.into();
+                for row in self.iter_mut() {
+                    row.indent = indent;
+                }
+                self
+            }
+
+            fn outdent<I: Into<Option<IndentEnabled>>>(&mut self, outdent: I) -> &mut Self {
+                let outdent = outdent.into();
+                for row in self.iter_mut() {
+                    row.outdent = outdent;
+                }
+                self
+            }
+        })*
+    }
+}
+
+impl_row_location_specifier!(for Vec<Row>, [Row]);
 
 #[cfg(test)]
 mod tests {
