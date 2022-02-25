@@ -89,7 +89,7 @@ rather than their title or *column name*.
 However, as humans it's much more natural and convenient to refer to *column names*
 when working with the data.
 Towards that end, the **smartsheet-rs** crate provides helper *struct* implementations
-such as the `ColumnMapper`, `CellGetter`, and `RowFinder` in order to simplify interaction
+such as the `ColumnMapper`, `CellGetter`, and `RowGetter` in order to simplify interaction
 with the Smartsheet API.
 
 ### Cells
