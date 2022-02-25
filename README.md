@@ -251,7 +251,7 @@ async fn main() -> Result<()> {
 
     // Create the `Cell` objects to add here.
     let cells = [
-        make.cell("Text/Number Column", 123.45)?,
+        make.cell("Text / Number Column", 123.45)?,
         make.cell("Symbol Column #1", LightPicker::Yellow)?,
         make.cell("Symbol Column #2", Decision::Hold)?,
         make.cell("Checkbox Column", true)?,
