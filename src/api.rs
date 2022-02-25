@@ -99,16 +99,16 @@ impl<'a> SmartsheetApi<'a> {
     ///
     pub async fn list_sheets_with_params(
         &self,
-        include: Option<Vec<ListSheetIncludeFlags>>,
-        include_all: Option<bool>,
-        modified_since: Option<&'a str>, // TODO change this to a date type maybe
+        include: impl Into<Option<Vec<ListSheetIncludeFlags>>>,
+        include_all: impl Into<Option<bool>>,
+        modified_since: impl Into<Option<&'a str>>, // TODO change this to a DATE type maybe
     ) -> Result<IndexResult<Sheet>> {
         let mut url = format!("{}/{}", self.endpoint, "sheets");
 
         ParamBuilder::new(&mut url)
-            .with_comma_separated_values("include", include)
-            .with_value("includeAll", include_all)
-            .with_value("modifiedSince", modified_since)
+            .with_comma_separated_values("include", include.into())
+            .with_value("includeAll", include_all.into())
+            .with_value("modifiedSince", modified_since.into())
             .build();
 
         debug!("URL: {}", url);
@@ -142,7 +142,7 @@ impl<'a> SmartsheetApi<'a> {
     /// - https://smartsheet-platform.github.io/api-docs/#row-include-flags
     ///
     pub async fn get_sheet(&self, sheet_id: u64) -> Result<Sheet> {
-        self.get_sheet_with_params(sheet_id, None, None, None, None, None, None)
+        self.get_sheet_with_params(sheet_id, None, None, None, None, None, None, None)
             .await
     }
 
@@ -175,22 +175,24 @@ impl<'a> SmartsheetApi<'a> {
     pub async fn get_sheet_with_params(
         &self,
         sheet_id: u64,
-        include: Option<Vec<SheetIncludeFlags>>,
-        exclude: Option<Vec<SheetExcludeFlags>>,
-        row_ids: Option<Vec<u64>>,
-        row_numbers: Option<Vec<u64>>,
-        column_ids: Option<Vec<u64>>,
-        rows_modified_since: Option<&'a str>, // TODO change this to a date type maybe
+        include: impl Into<Option<Vec<SheetIncludeFlags>>>,
+        exclude: impl Into<Option<Vec<SheetExcludeFlags>>>,
+        row_ids: impl Into<Option<Vec<u64>>>,
+        row_numbers: impl Into<Option<Vec<u64>>>,
+        column_ids: impl Into<Option<Vec<u64>>>,
+        rows_modified_since: impl Into<Option<&'a str>>, // TODO change this to a date type maybe
+        level: impl Into<Option<Level>>,
     ) -> Result<Sheet> {
         let mut url = format!("{}/{}/{}", self.endpoint, "sheets", sheet_id);
 
         ParamBuilder::new(&mut url)
-            .with_comma_separated_values("include", include)
-            .with_comma_separated_values("exclude", exclude)
-            .with_comma_separated_values("rowIds", row_ids)
-            .with_comma_separated_values("rowNumbers", row_numbers)
-            .with_comma_separated_values("columnIds", column_ids)
-            .with_value("rowsModifiedSince", rows_modified_since)
+            .with_comma_separated_values("include", include.into())
+            .with_comma_separated_values("exclude", exclude.into())
+            .with_comma_separated_values("rowIds", row_ids.into())
+            .with_comma_separated_values("rowNumbers", row_numbers.into())
+            .with_comma_separated_values("columnIds", column_ids.into())
+            .with_value("rowsModifiedSince", rows_modified_since.into())
+            .with_value("level", level.into())
             .build();
 
         debug!("URL: {}", url);
@@ -274,9 +276,9 @@ impl<'a> SmartsheetApi<'a> {
         &self,
         sheet_id: u64,
         row_id: u64,
-        include: Option<Vec<RowIncludeFlags>>,
-        exclude: Option<Vec<RowExcludeFlags>>,
-        level: Option<Level>,
+        include: impl Into<Option<Vec<RowIncludeFlags>>>,
+        exclude: impl Into<Option<Vec<RowExcludeFlags>>>,
+        level: impl Into<Option<Level>>,
     ) -> Result<Row> {
         let mut url: String = format!(
             "{}/{}/{}/{}/{}",
@@ -284,9 +286,9 @@ impl<'a> SmartsheetApi<'a> {
         );
 
         ParamBuilder::new(&mut url)
-            .with_comma_separated_values("include", include)
-            .with_comma_separated_values("exclude", exclude)
-            .with_value("level", level)
+            .with_comma_separated_values("include", include.into())
+            .with_comma_separated_values("exclude", exclude.into())
+            .with_value("level", level.into())
             .build();
 
         debug!("URL: {}", url);
@@ -335,16 +337,16 @@ impl<'a> SmartsheetApi<'a> {
     pub async fn list_columns_with_params(
         &self,
         sheet_id: u64,
-        level: Option<Level>,
-        include: Option<Vec<ColumnIncludeFlags>>,
-        include_all: Option<bool>,
+        level: impl Into<Option<Level>>,
+        include: impl Into<Option<Vec<ColumnIncludeFlags>>>,
+        include_all: impl Into<Option<bool>>,
     ) -> Result<IndexResult<Column>> {
         let mut url = format!("{}/{}/{}/{}", self.endpoint, "sheets", sheet_id, "columns");
 
         ParamBuilder::new(&mut url)
-            .with_value("level", level)
-            .with_comma_separated_values("include", include)
-            .with_value("includeAll", include_all)
+            .with_value("level", level.into())
+            .with_comma_separated_values("include", include.into())
+            .with_value("includeAll", include_all.into())
             .build();
 
         debug!("URL: {}", url);
@@ -398,8 +400,8 @@ impl<'a> SmartsheetApi<'a> {
         &self,
         sheet_id: u64,
         column_id: u64,
-        level: Option<Level>,
-        include: Option<Vec<ColumnIncludeFlags>>,
+        level: impl Into<Option<Level>>,
+        include: impl Into<Option<Vec<ColumnIncludeFlags>>>,
     ) -> Result<Column> {
         let mut url = format!(
             "{}/{}/{}/{}/{}",
@@ -407,8 +409,8 @@ impl<'a> SmartsheetApi<'a> {
         );
 
         ParamBuilder::new(&mut url)
-            .with_value("level", level)
-            .with_comma_separated_values("include", include)
+            .with_value("level", level.into())
+            .with_comma_separated_values("include", include.into())
             .build();
 
         debug!("URL: {}", url);

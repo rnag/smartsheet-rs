@@ -33,13 +33,13 @@ async fn main() -> Result<()> {
 
     let start = Instant::now();
 
-    let include = Some(vec![
+    let include = vec![
         ListSheetIncludeFlags::OwnerInfo,
         ListSheetIncludeFlags::SheetVersion,
         ListSheetIncludeFlags::Source,
-    ]);
+    ];
 
-    let include_all = Some(true);
+    let include_all = true;
 
     let result = smart
         .list_sheets_with_params(include, include_all, None)
