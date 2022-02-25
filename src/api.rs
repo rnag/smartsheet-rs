@@ -146,6 +146,39 @@ impl<'a> SmartsheetApi<'a> {
             .await
     }
 
+    /// **Get Sheet** - Retrieves the specified sheet. Returns the sheet,
+    /// including rows, and optionally populated with discussion and
+    /// attachment objects.
+    ///
+    /// # Note
+    ///
+    /// This is a convenience method to retrieve a Sheet with the `MULTI_CONTACT`
+    /// cell data correctly populated. This is primarily important so that we can
+    /// retrieve the email addresses for such cells, for example.
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to retrieve the rows and data for.
+    ///
+    /// # Docs
+    /// - https://smartsheet-platform.github.io/api-docs/#get-sheet
+    /// - https://smartsheet-platform.github.io/api-docs/#row-include-flags
+    ///
+    pub async fn get_sheet_with_multi_contact_info(&self, sheet_id: u64) -> Result<Sheet> {
+        self.get_sheet_with_params(
+            sheet_id,
+            // TODO: maybe change the underlying type to `slice` instead of `vec`?
+            Some(vec![SheetIncludeFlags::Base(RowIncludeFlags::ObjectValue)]),
+            None,
+            None,
+            None,
+            None,
+            None,
+            Level::MultiContact,
+        )
+        .await
+    }
+
     /// **Get Sheet** - Retrieves the specified sheet, with included
     /// _query parameters_. Returns the sheet, including rows, and optionally
     /// populated with discussion and attachment objects.

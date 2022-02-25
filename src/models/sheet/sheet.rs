@@ -4,9 +4,12 @@ use crate::models::{
 use crate::types::Result;
 
 use core::option::Option;
+use std::collections::HashMap;
 use std::io::{Error, ErrorKind};
 
 use serde::{Deserialize, Serialize};
+
+pub type RowIdToRow<'a> = HashMap<u64, &'a Row>;
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -57,5 +60,13 @@ impl Sheet {
                 "No row found for the given Row ID",
             ))),
         };
+    }
+
+    /// Retrieve a mapping of *row id* to `Row` object.
+    ///
+    /// Note: this is likely more efficient when multiple `Row`s are to be
+    /// retrieved based on their *row id*.
+    pub fn id_to_row(&self) -> RowIdToRow {
+        self.rows.iter().map(|row| (row.id, row)).collect()
     }
 }

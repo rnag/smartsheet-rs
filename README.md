@@ -167,7 +167,9 @@ println!("{:#?}", column_name_to_cell);
 
 #### Retrieve Rows
 
-To find one or more rows from a list that match a specified condition, you can use the `RowGetter` helper
+To retrieve an individual row from a sheet by its associated *row id*, you can simply use `Sheet::get_row_by_id`.
+
+If the goal is to find one or more rows that match a specified condition from a list of rows, you can use the `RowGetter` helper
 to make the task much more convenient.
 
 Here's a simple example to find the **first** `Row` where a `Cell` from a column has a particular value, and find
@@ -197,14 +199,12 @@ async fn main() -> Result<()> {
     let row = get_row
         // Note: "My Value" can be either a String, Number, or Boolean.
         .where_eq("Column 1", "My Value")?
-        // Normally you could use `.first()?` here if you were certain about
-        // finding it, but for example purposes, let's try to set a default
-        // otherwise.
+        // Only want to get the first row which matches the condition.
         .first()?;
 
     let rows = get_row
-        .where_ne("Column 2", 123.45)?
         // Retrieve *all* rows that *do not* match the specified cell value.
+        .where_ne("Column 2", 123.45)?
         .find_all()?;
 
     // Print the match for the first query

@@ -1,6 +1,6 @@
 //! Public helper utilities
 //!
-use crate::models::{Cell, CellValue, Column, Row};
+use crate::models::{Cell, CellValue, Column, IndexResult, Row, Sheet};
 use crate::types::Result;
 
 use std::collections::HashMap;
@@ -25,6 +25,24 @@ pub struct ColumnMapper<'a> {
     /// Note that the ID value is unique, internal, and used mainly in the
     /// Smartsheet API.
     pub id_to_name: ColumnIdToName<'a>,
+}
+
+impl<'a> From<&'a Sheet> for ColumnMapper<'a> {
+    fn from(sheet_ref: &'a Sheet) -> Self {
+        Self::new(&sheet_ref.columns)
+    }
+}
+
+impl<'a> From<&'a Row> for ColumnMapper<'a> {
+    fn from(sheet_ref: &'a Row) -> Self {
+        Self::new(&sheet_ref.columns)
+    }
+}
+
+impl<'a> From<&'a IndexResult<Column>> for ColumnMapper<'a> {
+    fn from(sheet_ref: &'a IndexResult<Column>) -> Self {
+        Self::new(&sheet_ref.data)
+    }
 }
 
 impl<'a> ColumnMapper<'a> {

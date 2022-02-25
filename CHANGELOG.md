@@ -14,7 +14,11 @@ Possible header types:
 ## v0.50 (2022-02-25)
 
 ### Features
+* Add new convenience method `get_sheet_with_multi_contact_info`
 * Add `Sheet::get_row_by_id`
+* Add `Sheet::id_to_row`
+* Add `ColumnMapper::from` implementations, so we can more easily create it
+  from a `Sheet` object, for example.
 * Add support for the following API methods:
   - [Add Rows](https://smartsheet-platform.github.io/api-docs/#add-rows)
   - [Update Rows](https://smartsheet-platform.github.io/api-docs/#update-rows)
