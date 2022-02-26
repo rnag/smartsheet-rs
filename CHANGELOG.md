@@ -14,7 +14,10 @@ Possible header types:
 ## v0.50 (2022-02-25)
 
 ### Features
+
 * Add new convenience method `get_sheet_with_multi_contact_info`
+  * Also add an example `cell_multi_contact`, which demonstrates how to work with
+    `MULTI_CONTACT` cell types in smartsheet.
 * Add `Sheet::get_row_by_id`
 * Add `Sheet::id_to_row`
 * Add `ColumnMapper::from` implementations, so we can more easily create it

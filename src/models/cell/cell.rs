@@ -1,4 +1,4 @@
-use crate::models::{CellValue, Hyperlink, Image};
+use crate::models::{CellValue, ContactOwned, Hyperlink, Image};
 use crate::types::Result;
 
 use core::fmt::Error;
@@ -8,7 +8,7 @@ use core::result::Result::{Err, Ok};
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize, Serializer};
 use serde_json::value::Value;
-use serde_json::Number;
+use serde_json::{from_value, Number};
 
 #[derive(Default, Debug, Clone, PartialEq, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -248,6 +248,27 @@ impl Cell {
                 if let Some(values) = obj_values.as_array() {
                     return Ok(values);
                 }
+            }
+        }
+        Err(Box::new(Error::default()))
+    }
+
+    /// Retrieve info on a cell for a **MULTI_CONTACT** column. This returns a list
+    /// containing a `ContactOwned` object for each contact in the cell.
+    ///
+    /// You can then get additional info from the returned result, such as via
+    /// the `addrs_str()` method for instance.
+    ///
+    /// Check out the `cell_multi_contact` example for intended usage with
+    /// this method.
+    ///
+    pub fn contacts(&self) -> Result<Vec<ContactOwned>> {
+        if let Some(ref obj_value) = self.object_value {
+            if let Some(values) = obj_value.get("values") {
+                return match from_value(values.to_owned()) {
+                    Ok(v) => Ok(v),
+                    Err(_) => Err(Box::new(Error::default())),
+                };
             }
         }
         Err(Box::new(Error::default()))
