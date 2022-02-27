@@ -15,17 +15,25 @@ Possible header types:
 
 ### Features
 
-* Add new convenience method `get_sheet_with_multi_contact_info`
-  * Also add an example `cell_multi_contact`, which demonstrates how to work with
-    `MULTI_CONTACT` cell types in smartsheet.
-* Add `Sheet::get_row_by_id`
-* Add `Sheet::id_to_row`
-* Add `ColumnMapper::from` implementations, so we can more easily create it
-  from a `Sheet` object, for example.
 * Add support for the following API methods:
   - [Add Rows](https://smartsheet-platform.github.io/api-docs/#add-rows)
   - [Update Rows](https://smartsheet-platform.github.io/api-docs/#update-rows)
   - [Delete Rows](https://smartsheet-platform.github.io/api-docs/#delete-rows)
+* Add helper struct `RowGetter` to find row(s) in a sheet that match a
+  specified condition.
+* Add helper struct `CellFactory` which makes it easier to create new `Cell`s,
+  useful when *adding* or *updating* rows in a sheet.
+* Add fluent methods to `Row`
+* Add convenience methods to `Row` such as `Row::with_cells`
+* Add new convenience method `SmartsheetApi::get_sheet_with_multi_contact_info`
+  * Also add an example `cell_multi_contact`, which demonstrates how to work with
+    `MULTI_CONTACT` cell types in smartsheet.
+* Add method `Sheet::get_row_by_id`
+* Add method `Sheet::id_to_row`
+* Add `CellValue::from` implementations, so we can more easily work with standard
+  Rust types such as `&str`.
+* Add `ColumnMapper::from` implementations, so we can more easily create it
+  from a `Sheet` object, for example.
 
 ## v0.4.0 (2022-02-25)
 

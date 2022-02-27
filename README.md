@@ -163,6 +163,44 @@ println!("{:#?}", column_name_to_cell);
 //      ...
 ```
 
+#### Multi-Contact Cells
+
+When working with more [complex objects] such as cells for a `MULTI_CONTACT`
+column type, the helper method `Cell::contacts` can be used to extract the
+contact info from the cell. Note that to retrieve the emails for each contact,
+it's necessary to pass the `include=objectValue` query parameter, along with the
+corresponding `level` parameter, in order to gather the full *Multi-contact* details.
+
+[complex objects]: https://smartsheet.redoc.ly/#section/API-Basics/Multi-contact-or-Multi-picklist:-Working-with-Complex-Objects
+
+Here is the relevant part of the code which demonstrates the ideal way of processing
+`MULTI_CONTACT` cell data for a given row:
+
+```rust
+// Retrieve the sheet with `MULTI_CONTACT` info included, such as emails.
+let sheet = smart.get_sheet_with_multi_contact_info(sheet_id).await?;
+
+// Let's assume we retrieve the cell for the specified column from the first row.
+let first_row = &sheet.rows[0];
+let cell = get_cell.by_name(&first_row, "My Multi-Contact Column")?;
+
+// Now we create a list of `Contact` objects from the cell details.
+let contacts = cell.contacts()?;
+
+// Get the contact emails, as a comma-delimited string in the format
+// *john1@example.com, john2@example.com*
+let emails = contacts.addrs_str();
+
+// Get a list of contact name addresses, where each one as indicated
+// in the RFC will be in the format `[display-name] angle-addr` --
+// that is, for example, *John Doe <john@example.com>*
+let names = contacts.name_addrs();
+```
+
+For the full code, check out the [`cell_multi_contact`] example in the project repo.
+
+[`cell_multi_contact`]: https://github.com/rnag/smartsheet-rs/blob/main/examples/cell_multi_contact.rs
+
 ### Rows
 
 #### Retrieve Rows
@@ -217,6 +255,11 @@ async fn main() -> Result<()> {
     Ok(())
 }
 ```
+
+Similar to the example of retrieving *multiple* `Cell` objects from a `Row`,
+the `Sheet::id_to_row` method can be used to build out a mapping of each *row id* to
+its associated `Row` object. This can be useful when searching for multiple `Row` objects
+by their *row id* value.
 
 #### Create Rows
 
