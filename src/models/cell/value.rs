@@ -1,4 +1,5 @@
 use crate::models::CellValue::{Boolean, Numeric, Text};
+use crate::models::{Decision, LightPicker};
 use crate::types::Result;
 
 use core::fmt::Error;
@@ -32,6 +33,48 @@ pub enum CellValue {
     Text(String),
     Boolean(bool),
     Numeric(Number),
+}
+
+impl From<&str> for CellValue {
+    fn from(value: &str) -> Self {
+        Text(value.to_owned())
+    }
+}
+
+impl From<char> for CellValue {
+    fn from(value: char) -> Self {
+        Text(value.to_string())
+    }
+}
+
+impl From<bool> for CellValue {
+    fn from(value: bool) -> Self {
+        Boolean(value)
+    }
+}
+
+impl From<u64> for CellValue {
+    fn from(value: u64) -> Self {
+        Numeric(Number::from(value))
+    }
+}
+
+impl From<f64> for CellValue {
+    fn from(value: f64) -> Self {
+        Numeric(Number::from_f64(value).unwrap())
+    }
+}
+
+impl From<Decision> for CellValue {
+    fn from(value: Decision) -> Self {
+        Text(value.to_string())
+    }
+}
+
+impl From<LightPicker> for CellValue {
+    fn from(value: LightPicker) -> Self {
+        Text(value.to_string())
+    }
 }
 
 impl CellValue {

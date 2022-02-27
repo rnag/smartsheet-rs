@@ -17,6 +17,12 @@ this crate.
 * [Getting Started](#getting-started)
 * [Implemented Methods](#implemented-methods)
 * [A Larger Example](#a-larger-example)
+  * [Cells](#cells)
+    * [Retrieve Cells](#retrieve-cells) 
+    * [Multi-Contact Cells](#multi-contact-cells)
+  * [Rows](#rows)
+    * [Retrieve Rows](#retrieve-rows)
+    * [Create Rows](#create-rows)
 * [Dependencies and Features](#dependencies-and-features)
 * [Contributing](#contributing)
 * [License](#license)
@@ -36,7 +42,7 @@ Getting started with the `smartsheet-rs` library is easy:
 
    ```toml
    [dependencies]
-   smartsheet-rs = "0.4"
+   smartsheet-rs = "0.5"
    tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
    ```
 
@@ -69,8 +75,11 @@ have been implemented currently:
 - [List Sheets](https://smartsheet-platform.github.io/api-docs/#list-sheets)
 - [List Columns](https://smartsheet-platform.github.io/api-docs/#list-columns)
 - [Get Sheet](https://smartsheet-platform.github.io/api-docs/#get-sheet)
-- [Get Row](https://smartsheet-platform.github.io/api-docs/#get-row)
 - [Get Column](https://smartsheet-platform.github.io/api-docs/#get-column)
+- [Get Row](https://smartsheet-platform.github.io/api-docs/#get-row)
+- [Add Rows](https://smartsheet-platform.github.io/api-docs/#add-rows)
+- [Update Rows](https://smartsheet-platform.github.io/api-docs/#update-rows)
+- [Delete Rows](https://smartsheet-platform.github.io/api-docs/#delete-rows)
 
 You can check out sample usage of these API methods in the [examples/](https://github.com/rnag/smartsheet-rs/tree/main/examples)
 folder in the project repo on GitHub.
@@ -84,8 +93,18 @@ rather than their title or *column name*.
 However, as humans it's much more natural and convenient to refer to *column names*
 when working with the data.
 Towards that end, the **smartsheet-rs** crate provides helper *struct* implementations
-such as the `ColumnMapper` and `CellGetter` in order to simplify interaction
+such as the `ColumnMapper`, `CellGetter`, and `RowGetter` in order to simplify interaction
 with the Smartsheet API.
+
+### Cells
+
+#### Retrieve Cells
+
+To retrieve an individual cell from a row by its associated *column id*, you can simply use `Row::get_cell_by_id`.
+
+To instead retrieve a single `Cell` by its *column name*, you can first 
+build out a mapping of *Column Name to Id* with a `ColumnMapper`, and then
+pair that with `CellGetter` in order to retrieve a Cell from a Row.
 
 Here's a quick example of how that would work:
 
@@ -126,7 +145,7 @@ async fn main() -> Result<()> {
 ```
 
 The `CellGetter::by_name` method works by iterating over each cell in the row,
-and then returning the first `Cell` where the *column ID* for the cell
+and then returning the first `Cell` where the *Column Id* for the cell
 matches the specified *column name*.
 
 If the need arises to retrieve *multiple* `Cell` objects from a `Row` by their column names,
@@ -145,6 +164,162 @@ println!("{:#?}", column_name_to_cell);
 //      ...
 ```
 
+#### Multi-Contact Cells
+
+When working with more [complex objects] such as cells for a `MULTI_CONTACT`
+column type, the helper method `Cell::contacts` can be used to extract the
+contact info from the cell. Note that to retrieve the emails for each contact,
+it's necessary to pass the `include=objectValue` query parameter, along with the
+corresponding `level` parameter, in order to gather the full *Multi-contact* details.
+
+[complex objects]: https://smartsheet.redoc.ly/#section/API-Basics/Multi-contact-or-Multi-picklist:-Working-with-Complex-Objects
+
+Here is the relevant part of the code which demonstrates the ideal way of processing
+`MULTI_CONTACT` cell data for a given row:
+
+```rust
+// Retrieve the sheet with `MULTI_CONTACT` info included, such as emails.
+let sheet = smart.get_sheet_with_multi_contact_info(sheet_id).await?;
+
+// Let's assume we retrieve the cell for the specified column from the first row.
+let cell = get_cell.by_name(&sheet.rows[0], "My Multi-Contact Column")?;
+
+// Now we create a list of `Contact` objects from the cell details.
+let contacts = cell.contacts()?;
+
+// Get the contact emails, as a comma-delimited string in the format
+// *john1@example.com, john2@example.com*
+let emails = contacts.addrs_str();
+
+// Get a list of contact name addresses, where each one as indicated
+// in the RFC will be in the format `[display-name] angle-addr` --
+// that is, for example, *John Doe <john@example.com>*
+let names = contacts.name_addrs();
+```
+
+For the full code, check out the [`cell_multi_contact`] example in the project repo.
+
+[`cell_multi_contact`]: https://github.com/rnag/smartsheet-rs/blob/main/examples/cell_multi_contact.rs
+
+### Rows
+
+#### Retrieve Rows
+
+To retrieve an individual row from a sheet by its associated *row id*, you can simply use `Sheet::get_row_by_id`.
+
+If the goal is to find one or more rows that match a specified condition from a list of rows, you can use the `RowGetter` helper
+to make the task much more convenient.
+
+Here's a simple example to find the **first** `Row` where a `Cell` from a column has a particular value, and find
+**all** `Row`s where  a `Cell` from a column does *not* have a specified value.
+
+```rust
+use serde_json::to_string_pretty;
+use smartsheet_rs::{ColumnMapper, RowGetter, SmartsheetApi};
+
+// TODO update these values as needed
+const SHEET_ID: u64 = 1234567890;
+
+// A simple type alias so as to DRY.
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let smart = SmartsheetApi::from_env()?;
+
+    let sheet = smart.get_sheet(SHEET_ID).await?;
+    let cols = ColumnMapper::from(&sheet);
+
+    // Create a `RowGetter` helper to find rows in a sheet by a condition
+    // based on a *Column Name* and *Column Value*.
+    let get_row = RowGetter::new(&sheet.rows, &cols);
+
+    let row = get_row
+        // Note: "My Value" can be either a String, Number, or Boolean.
+        .where_eq("Column 1", "My Value")?
+        // Only want to get the first row which matches the condition.
+        .first()?;
+
+    let rows = get_row
+        // Retrieve *all* rows that *do not* match the specified cell value.
+        .where_ne("Column 2", 123.45)?
+        .find_all()?;
+
+    // Print the match for the first query
+    println!("Here's the first result: {:#?}", *row);
+
+    // Print the list of rows that match the second query
+    println!("Found {} Rows that match the second condition:", rows.len());
+    println!("{}", to_string_pretty(&rows)?);
+
+    Ok(())
+}
+```
+
+Similar to the example of retrieving *multiple* `Cell` objects from a `Row`,
+the `Sheet::id_to_row` method can be used to build out a mapping of each *row id* to
+its associated `Row` object. This can be useful when searching for multiple `Row` objects
+by their *row id* value.
+
+#### Create Rows
+
+To add or update rows, it's necessary to build out a list of cells to update the
+values for, and then add the cells to the row.
+The helper *struct* `CellFactory` can be used to construct `Cell` objects to add to a `Row`.
+
+Note that to *add* rows, we need to pass in a [location-specifier](https://smartsheet.redoc.ly/#section/Specify-Row-Location) attribute.
+To *update* rows, we only need to set the *Row Id* for each row.
+
+An example of *adding* a new `Row` to a sheet is shown below. Here we set the location specifier
+`to_top` to send the new row to the top of the sheet.
+
+```rust
+use serde_json::to_string_pretty;
+use smartsheet_rs::models::{Decision, LightPicker, Row, RowLocationSpecifier};
+use smartsheet_rs::{CellFactory, ColumnMapper, SmartsheetApi};
+
+// TODO update these values as needed
+const SHEET_ID: u64 = 1234567890;
+
+// A simple type alias so as to DRY.
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let smart = SmartsheetApi::from_env()?;
+
+    let index_result = smart.list_columns(SHEET_ID).await?;
+    let cols = ColumnMapper::from(&index_result);
+
+    // Create a `CellFactory` helper to build out a list of cells to create
+    // a `Row` from.
+    let make = CellFactory::new(&cols);
+
+    // Create the `Cell` objects to add here.
+    let cells = [
+        make.cell("Text/Number Column", 123.45)?,
+        make.cell("Symbol Column #1", LightPicker::Yellow)?,
+        make.cell("Symbol Column #2", Decision::Hold)?,
+        make.cell("Checkbox Column", true)?,
+        make.contact_cell("Assigned To", "user1.email@smartsheet.com")?,
+        make.url_hyperlink_cell("Link to Page", "Rust Homepage", "https://rust-lang.org")?,
+        make.multi_picklist_cell(
+            "Multi Dropdown Column",
+            &["Hello, world!", "Testing", "1 2 3"],
+        )?,
+    ];
+
+    // Create a new `Row` from the list of `Cell` objects.
+    let row_to_add = Row::from(&cells);
+    println!("Input Object: {}", to_string_pretty(&row_to_add)?);
+    
+    // Add the Rows to the Sheet
+    let _ = smart.add_rows(SHEET_ID, [row_to_add].to_top(true)).await?;
+
+    Ok(())
+}
+```
+
 ## Dependencies and Features
 
 This library uses only the minimum required dependencies, in order
@@ -161,7 +336,7 @@ To do this, disable the default "rust-tls" feature and enable the "native-tls" f
 
 ```toml
 [dependencies]
-smartsheet-rs = { version = "0.4", default-features = false, features = ["native-tls", "logging", "serde-std"] }
+smartsheet-rs = { version = "0.5", default-features = false, features = ["native-tls", "logging", "serde-std"] }
 ```
 
 [`hyper`]: https://docs.rs/hyper

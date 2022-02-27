@@ -8,6 +8,10 @@ use hyper::body::Buf;
 use hyper::{Body, Response};
 use serde::de;
 
+pub fn is_default<T: Default + PartialEq>(t: &T) -> bool {
+    t == &T::default()
+}
+
 #[cfg(feature = "serde-std")]
 pub async fn resp_into_struct<T>(resp: Response<Body>) -> Result<T>
 where

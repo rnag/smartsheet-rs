@@ -24,6 +24,8 @@ struct TableRow<'a> {
     id: u64,
     #[header("Column Name")]
     name: &'a str,
+    #[header("Column Type")]
+    type_field: &'a str,
 }
 
 async fn fetch_args() -> Result<u64> {
@@ -31,7 +33,7 @@ async fn fetch_args() -> Result<u64> {
     match env::args().nth(1) {
         Some(sheet_id) => Ok(sheet_id.parse::<u64>()?),
         None => {
-            let error_msg = "Usage: columns_with_level <sheet_id>";
+            let error_msg = "Usage: columns_with_params <sheet_id>";
             error!("{}", error_msg);
             Err(Box::new(Error::new(ErrorKind::InvalidInput, error_msg)))
         }
@@ -57,7 +59,7 @@ async fn main() -> Result<()> {
         .await?;
 
     println!(
-        "List Columns with Level completed in {:.2?}",
+        "List Columns with Params completed in {:.2?}",
         start.elapsed()
     );
     println!();
@@ -77,6 +79,7 @@ async fn main() -> Result<()> {
         rows.push(TableRow {
             id: column.id,
             name: &column.title,
+            type_field: &column.type_field,
         });
     }
 

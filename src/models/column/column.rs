@@ -3,11 +3,11 @@ use core::option::Option;
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Column {
     pub id: u64,
     pub index: u64,
     pub locked: Option<bool>,
-    #[serde(rename = "lockedForUser")]
     pub locked_for_user: Option<bool>,
     pub title: String,
     #[serde(rename = "type")]
@@ -23,6 +23,5 @@ pub struct Column {
     pub primary: Option<bool>,
     pub format: Option<String>,
     pub formula: Option<String>,
-    #[serde(rename = "contactOptions")]
     pub contact_options: Option<Vec<ContactOption>>,
 }

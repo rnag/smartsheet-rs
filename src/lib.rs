@@ -48,8 +48,11 @@
 //! - [List Sheets](https://smartsheet-platform.github.io/api-docs/#list-sheets)
 //! - [List Columns](https://smartsheet-platform.github.io/api-docs/#list-columns)
 //! - [Get Sheet](https://smartsheet-platform.github.io/api-docs/#get-sheet)
-//! - [Get Row](https://smartsheet-platform.github.io/api-docs/#get-row)
 //! - [Get Column](https://smartsheet-platform.github.io/api-docs/#get-column)
+//! - [Get Row](https://smartsheet-platform.github.io/api-docs/#get-row)
+//! - [Add Rows](https://smartsheet-platform.github.io/api-docs/#add-rows)
+//! - [Update Rows](https://smartsheet-platform.github.io/api-docs/#update-rows)
+//! - [Delete Rows](https://smartsheet-platform.github.io/api-docs/#delete-rows)
 //!
 //! You can check out sample usage of these API methods in the [examples/](https://github.com/rnag/smartsheet-rs/tree/main/examples)
 //! folder in the project repo on GitHub.
@@ -78,7 +81,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! smartsheet-rs = { version = "0.3", default-features = false, features = ["native-tls", "logging", "serde-std"] }
+//! smartsheet-rs = { version = "0.5", default-features = false, features = ["native-tls", "logging", "serde-std"] }
 //! ```
 //!
 //! [hyper]: https://docs.rs/hyper
@@ -106,11 +109,13 @@ mod log {
 }
 
 pub use api::SmartsheetApi;
-pub use helpers::{CellGetter, ColumnMapper};
+pub use cell_factory::CellFactory;
+pub use helpers::{CellGetter, ColumnMapper, RowGetter};
 
 mod api;
 pub mod auth;
 pub mod builders;
+mod cell_factory;
 pub mod constants;
 pub mod helpers;
 mod https;

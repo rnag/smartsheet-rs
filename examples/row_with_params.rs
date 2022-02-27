@@ -5,7 +5,6 @@ use std::env;
 use std::io::{Error, ErrorKind};
 use std::time::Instant;
 
-use smartsheet_rs;
 use smartsheet_rs::models::{Level, Row, RowExcludeFlags, RowIncludeFlags};
 use smartsheet_rs::{CellGetter, ColumnMapper};
 
@@ -68,7 +67,7 @@ async fn main() -> Result<()> {
         RowIncludeFlags::Discussions,
         RowIncludeFlags::ObjectValue,
         RowIncludeFlags::RowPermalink,
-        RowIncludeFlags::RowWriterInfo,
+        RowIncludeFlags::WriterInfo,
     ];
 
     let exclude = vec![
@@ -155,7 +154,7 @@ async fn print_column_names_and_cell_values<'a>(
     println!("Column Names and Values");
     println!("---");
 
-    for (col_name, _col_id) in &cols.name_to_id {
+    for &col_name in cols.name_to_id.keys() {
         if let Ok(cell) = get_cell.by_name(row, col_name) {
             println!("Column Name: {}", col_name);
             // Print out the cell value

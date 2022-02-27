@@ -15,7 +15,7 @@ use std::time::Instant;
 
 use hyper::client::HttpConnector;
 use hyper::header::AUTHORIZATION;
-use hyper::{Body, Client, Request};
+use hyper::{Body, Client, Method, Request};
 
 /// Client implementation for making requests to the *Smartsheet
 /// API v2*
@@ -146,6 +146,39 @@ impl<'a> SmartsheetApi<'a> {
             .await
     }
 
+    /// **Get Sheet** - Retrieves the specified sheet. Returns the sheet,
+    /// including rows, and optionally populated with discussion and
+    /// attachment objects.
+    ///
+    /// # Note
+    ///
+    /// This is a convenience method to retrieve a Sheet with the `MULTI_CONTACT`
+    /// cell data correctly populated. This is primarily important so that we can
+    /// retrieve the email addresses for such cells, for example.
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to retrieve the rows and data for.
+    ///
+    /// # Docs
+    /// - https://smartsheet-platform.github.io/api-docs/#get-sheet
+    /// - https://smartsheet-platform.github.io/api-docs/#row-include-flags
+    ///
+    pub async fn get_sheet_with_multi_contact_info(&self, sheet_id: u64) -> Result<Sheet> {
+        self.get_sheet_with_params(
+            sheet_id,
+            // TODO: maybe change the underlying type to `slice` instead of `vec`?
+            Some(vec![SheetIncludeFlags::Base(RowIncludeFlags::ObjectValue)]),
+            None,
+            None,
+            None,
+            None,
+            None,
+            Some(Level::MultiContact),
+        )
+        .await
+    }
+
     /// **Get Sheet** - Retrieves the specified sheet, with included
     /// _query parameters_. Returns the sheet, including rows, and optionally
     /// populated with discussion and attachment objects.
@@ -172,6 +205,7 @@ impl<'a> SmartsheetApi<'a> {
     /// - https://smartsheet-platform.github.io/api-docs/#get-sheet
     /// - https://smartsheet-platform.github.io/api-docs/#row-include-flags
     ///
+    #[allow(clippy::too_many_arguments)]
     pub async fn get_sheet_with_params(
         &self,
         sheet_id: u64,
@@ -257,6 +291,34 @@ impl<'a> SmartsheetApi<'a> {
             .await
     }
 
+    /// **Get Row** - Retrieves the specified row from a sheet, with included
+    /// _Multi-contact data_.
+    ///
+    /// # Note
+    ///
+    /// This is a convenience method to retrieve a Row with the `MULTI_CONTACT`
+    /// cell data correctly populated. This is primarily important so that we can
+    /// retrieve the email addresses for such cells, for example.
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to retrieve the rows from.
+    /// * `row_id` - The specified row to retrieve.
+    ///
+    /// # Docs
+    /// - https://smartsheet-platform.github.io/api-docs/#get-row
+    ///
+    pub async fn get_row_with_multi_contact_info(&self, sheet_id: u64, row_id: u64) -> Result<Row> {
+        self.get_row_with_params(
+            sheet_id,
+            row_id,
+            Some(vec![RowIncludeFlags::ObjectValue]),
+            None,
+            Some(Level::MultiContact),
+        )
+        .await
+    }
+
     /// **Get Row** - Retrieves the specified row from a sheet, with included _query parameters_.
     ///
     /// # Arguments
@@ -308,6 +370,239 @@ impl<'a> SmartsheetApi<'a> {
         debug!("Deserialize: {:?}", start.elapsed());
 
         Ok(row)
+    }
+
+    /// **Add Rows** - Inserts one or more rows into the sheet.
+    ///
+    /// If you want to insert the rows in any position but the default, use
+    /// [location-specifier attributes].
+    ///
+    /// [location-specifier attributes]: https://smartsheet.redoc.ly/tag/rowsRelated#section/Specify-Row-Location
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to add the rows to.
+    /// * `rows` - An array (list) of new Rows with the cell values to add.
+    ///
+    /// # Docs
+    /// - <https://smartsheet.redoc.ly/#operation/rows-addToSheet>
+    ///
+    pub async fn add_rows(&self, sheet_id: u64, rows: impl Into<Vec<Row>>) -> Result<RowResult> {
+        self.add_rows_with_params(sheet_id, rows, None, None).await
+    }
+
+    /// **Add Rows** - Inserts one or more rows into the sheet, with included
+    /// _query parameters_.
+    ///
+    /// If you want to insert the rows in any position but the default, use
+    /// [location-specifier attributes].
+    ///
+    /// [location-specifier attributes]: https://smartsheet.redoc.ly/tag/rowsRelated#section/Specify-Row-Location
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to add the rows to.
+    /// * `rows` - An array (list) of new Rows with the cell values to add.
+    /// * `allow_partial_success` - Default: `false`. When specified with a value
+    ///               of `true`, enables partial success for this bulk operation.
+    ///               See [Partial Success] for more information.
+    /// * `override_validation` - Default: `false`. If set to a value of `true`,
+    ///               allows a cell value outside of the validation limits. You
+    ///               must also specify **strict** on a per-cell level with a
+    ///               value of **false** to bypass value type checking.
+    ///
+    /// [Partial Success]: https://smartsheet.redoc.ly/#section/Work-at-Scale/Bulk-Operations
+    ///
+    /// # Docs
+    /// - <https://smartsheet.redoc.ly/#operation/rows-addToSheet>
+    ///
+    pub async fn add_rows_with_params(
+        &self,
+        sheet_id: u64,
+        rows: impl Into<Vec<Row>>,
+        allow_partial_success: impl Into<Option<bool>>,
+        override_validation: impl Into<Option<bool>>,
+    ) -> Result<RowResult> {
+        self.add_or_update_rows(
+            Method::POST,
+            sheet_id,
+            rows,
+            allow_partial_success.into(),
+            override_validation.into(),
+        )
+        .await
+    }
+
+    /// **Update Rows** - Updates cell values in the specified rows,
+    /// expands/collapses the specified rows, and/or modifies the position of
+    /// specified rows (including indenting/outdenting). For detailed
+    /// information about changing row positions, see
+    /// [location-specifier attributes].
+    ///
+    /// [location-specifier attributes]: https://smartsheet.redoc.ly/tag/rowsRelated#section/Specify-Row-Location
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to update the rows in.
+    /// * `rows` - An array (list) of Rows with the updated cell values.
+    ///
+    /// # Docs
+    /// - <https://smartsheet.redoc.ly/#operation/update-rows>
+    ///
+    pub async fn update_rows(&self, sheet_id: u64, rows: impl Into<Vec<Row>>) -> Result<RowResult> {
+        self.update_rows_with_params(sheet_id, rows, None, None)
+            .await
+    }
+
+    /// **Update Rows** - Updates cell values in the specified rows,
+    /// with included _query parameters_.
+    ///
+    /// Alternatively, expands/collapses the specified rows, and/or modifies
+    /// the position of specified rows (including indenting/outdenting). For
+    /// detailed information about changing row positions, see
+    /// [location-specifier attributes].
+    ///
+    /// [location-specifier attributes]: https://smartsheet.redoc.ly/tag/rowsRelated#section/Specify-Row-Location
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to update the rows in.
+    /// * `rows` - An array (list) of Rows with the updated cell values.
+    /// * `allow_partial_success` - When specified with a value of `true`, enables
+    ///               partial success for this bulk operation. See [Partial
+    ///               Success] for more information.
+    /// * `override_validation` - If set to a value of `true`, allows a cell value
+    ///               outside of the validation limits. You must also specify **strict**
+    ///               on a per-cell level with a value of **false** to bypass value
+    ///               type checking.
+    ///
+    /// [Partial Success]: https://smartsheet.redoc.ly/#section/Work-at-Scale/Bulk-Operations
+    ///
+    /// # Docs
+    /// - <https://smartsheet.redoc.ly/#operation/update-rows>
+    ///
+    pub async fn update_rows_with_params(
+        &self,
+        sheet_id: u64,
+        rows: impl Into<Vec<Row>>,
+        allow_partial_success: impl Into<Option<bool>>,
+        override_validation: impl Into<Option<bool>>,
+    ) -> Result<RowResult> {
+        self.add_or_update_rows(
+            Method::PUT,
+            sheet_id,
+            rows,
+            allow_partial_success.into(),
+            override_validation.into(),
+        )
+        .await
+    }
+
+    /// Internal method to *add* or *update* rows in a sheet.
+    pub(crate) async fn add_or_update_rows(
+        &self,
+        method: hyper::Method,
+        sheet_id: u64,
+        rows: impl Into<Vec<Row>>,
+        allow_partial_success: Option<bool>,
+        override_validation: Option<bool>,
+    ) -> Result<RowResult> {
+        // The endpoint to ADD or UPDATE rows is the same.
+        let mut url: String = format!("{}/{}/{}/{}", self.endpoint, "sheets", sheet_id, "rows");
+
+        ParamBuilder::new(&mut url)
+            .with_value("allowPartialSuccess", allow_partial_success)
+            .with_value("overrideValidation", override_validation)
+            .build();
+
+        debug!("URL: {}", url);
+
+        let data = serde_json::to_vec(&rows.into())?;
+
+        let req = Request::builder()
+            .method(method)
+            .uri(&url)
+            .header(AUTHORIZATION, &self.bearer_token)
+            .body(Body::from(data))?;
+
+        let mut res = self.client.request(req).await?;
+        raise_for_status(url, &mut res).await?;
+
+        let start = Instant::now();
+
+        // asynchronously aggregate the chunks of the body
+        let result = into_struct_from_slice(res).await?;
+
+        debug!("Deserialize: {:?}", start.elapsed());
+
+        Ok(result)
+    }
+
+    /// **Delete Rows** - Deletes one or more specified rows from the sheet.
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to delete the rows from.
+    /// * `row_ids` - An array (list) containing the IDs of the Rows to
+    ///               delete from the smartsheet.
+    ///
+    /// # Docs
+    /// - <https://smartsheet.redoc.ly/#operation/delete-rows>
+    ///
+    pub async fn delete_rows<const N: usize>(
+        &self,
+        sheet_id: u64,
+        row_ids: impl Into<[u64; N]>,
+    ) -> Result<RowResult<u64>> {
+        self.delete_rows_with_params(sheet_id, row_ids, None).await
+    }
+
+    /// **Delete Rows** - Deletes one or more specified rows from the sheet,
+    /// with included _query parameters_.
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to delete the rows from.
+    /// * `row_ids` - An array (list) containing the IDs of the Rows to
+    ///               delete from the smartsheet.
+    /// * `ignore_rows_not_found` -  Default: `false`. If set to `false` and any of
+    ///              the specified Row IDs are not found, no rows are deleted,
+    ///              and the "not found" error is returned.
+    ///
+    /// # Docs
+    /// - <https://smartsheet.redoc.ly/#operation/delete-rows>
+    ///
+    pub async fn delete_rows_with_params<const N: usize>(
+        &self,
+        sheet_id: u64,
+        row_ids: impl Into<[u64; N]>,
+        ignore_rows_not_found: impl Into<Option<bool>>,
+    ) -> Result<RowResult<u64>> {
+        // The endpoint to ADD or UPDATE rows is the same.
+        let mut url: String = format!("{}/{}/{}/{}", self.endpoint, "sheets", sheet_id, "rows");
+
+        ParamBuilder::new(&mut url)
+            .with_array("ids", row_ids.into())
+            .with_value("ignoreRowsNotFound", ignore_rows_not_found.into())
+            .build();
+
+        debug!("URL: {}", url);
+
+        let req = Request::delete(&url)
+            .header(AUTHORIZATION, &self.bearer_token)
+            .body(Body::empty())?;
+
+        let mut res = self.client.request(req).await?;
+        raise_for_status(url, &mut res).await?;
+
+        let start = Instant::now();
+
+        // asynchronously aggregate the chunks of the body
+        let result = into_struct_from_slice(res).await?;
+
+        debug!("Deserialize: {:?}", start.elapsed());
+
+        Ok(result)
     }
 
     /// **List Columns** - Gets a list of all columns belonging to the specified sheet.
@@ -461,16 +756,17 @@ impl<'a> SmartsheetApi<'a> {
         let result = self.list_sheets_with_params(None, Some(true), None).await?;
 
         // Find the sheet by the provided name
-        for sheet in result.data {
-            if sheet.name == sheet_name {
-                return Ok(sheet);
-            }
-        }
-
-        Err(Box::from(Error::new(
-            ErrorKind::NotFound,
-            format!("The provided sheet `{}` was not found", sheet_name),
-        )))
+        return match result
+            .data
+            .into_iter()
+            .find(|sheet| sheet.name == sheet_name)
+        {
+            Some(sheet) => Ok(sheet),
+            None => Err(Box::from(Error::new(
+                ErrorKind::NotFound,
+                format!("The provided sheet `{}` was not found", sheet_name),
+            ))),
+        };
     }
 
     /// **Get Column By Title** - Convenience function to retrieve a specified
@@ -509,15 +805,16 @@ impl<'a> SmartsheetApi<'a> {
             .await?;
 
         // Find the column by the provided name
-        for column in result.data {
-            if column.title == column_title {
-                return Ok(column);
-            }
-        }
-
-        Err(Box::from(Error::new(
-            ErrorKind::NotFound,
-            format!("The provided column `{}` was not found", column_title),
-        )))
+        return match result
+            .data
+            .into_iter()
+            .find(|column| column.title == column_title)
+        {
+            Some(column) => Ok(column),
+            None => Err(Box::from(Error::new(
+                ErrorKind::NotFound,
+                format!("The provided column `{}` was not found", column_title),
+            ))),
+        };
     }
 }
