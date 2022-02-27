@@ -182,8 +182,7 @@ Here is the relevant part of the code which demonstrates the ideal way of proces
 let sheet = smart.get_sheet_with_multi_contact_info(sheet_id).await?;
 
 // Let's assume we retrieve the cell for the specified column from the first row.
-let first_row = &sheet.rows[0];
-let cell = get_cell.by_name(&first_row, "My Multi-Contact Column")?;
+let cell = get_cell.by_name(&sheet.rows[0], "My Multi-Contact Column")?;
 
 // Now we create a list of `Contact` objects from the cell details.
 let contacts = cell.contacts()?;

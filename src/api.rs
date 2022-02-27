@@ -174,7 +174,7 @@ impl<'a> SmartsheetApi<'a> {
             None,
             None,
             None,
-            Level::MultiContact,
+            Some(Level::MultiContact),
         )
         .await
     }
@@ -289,6 +289,34 @@ impl<'a> SmartsheetApi<'a> {
         let include_flags = Some(vec![RowIncludeFlags::Columns]);
         self.get_row_with_params(sheet_id, row_id, include_flags, None, None)
             .await
+    }
+
+    /// **Get Row** - Retrieves the specified row from a sheet, with included
+    /// _Multi-contact data_.
+    ///
+    /// # Note
+    ///
+    /// This is a convenience method to retrieve a Row with the `MULTI_CONTACT`
+    /// cell data correctly populated. This is primarily important so that we can
+    /// retrieve the email addresses for such cells, for example.
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to retrieve the rows from.
+    /// * `row_id` - The specified row to retrieve.
+    ///
+    /// # Docs
+    /// - https://smartsheet-platform.github.io/api-docs/#get-row
+    ///
+    pub async fn get_row_with_multi_contact_info(&self, sheet_id: u64, row_id: u64) -> Result<Row> {
+        self.get_row_with_params(
+            sheet_id,
+            row_id,
+            Some(vec![RowIncludeFlags::ObjectValue]),
+            None,
+            Some(Level::MultiContact),
+        )
+        .await
     }
 
     /// **Get Row** - Retrieves the specified row from a sheet, with included _query parameters_.
