@@ -205,6 +205,7 @@ impl<'a> SmartsheetApi<'a> {
     /// - https://smartsheet-platform.github.io/api-docs/#get-sheet
     /// - https://smartsheet-platform.github.io/api-docs/#row-include-flags
     ///
+    #[allow(clippy::too_many_arguments)]
     pub async fn get_sheet_with_params(
         &self,
         sheet_id: u64,
@@ -343,12 +344,50 @@ impl<'a> SmartsheetApi<'a> {
         Ok(row)
     }
 
+    /// **Add Rows** - Inserts one or more rows into the sheet.
+    ///
+    /// If you want to insert the rows in any position but the default, use
+    /// [location-specifier attributes].
+    ///
+    /// [location-specifier attributes]: https://smartsheet.redoc.ly/tag/rowsRelated#section/Specify-Row-Location
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to add the rows to.
+    /// * `rows` - An array (list) of new Rows with the cell values to add.
+    ///
+    /// # Docs
+    /// - <https://smartsheet.redoc.ly/#operation/rows-addToSheet>
+    ///
     pub async fn add_rows(&self, sheet_id: u64, rows: impl Into<Vec<Row>>) -> Result<RowResult> {
         self.add_rows_with_params(sheet_id, rows, None, None).await
     }
 
-    /// allowPartialSuccess - Default: False. When specified with a value of true, enables partial success for this bulk operation. See Partial Success for more information
-    /// overrideValidation - Default: False. You may use the query string parameter overrideValidation with a value of true to allow a cell value outside of the validation limits. You must specify strict with a value of false to bypass value type checking.
+    /// **Add Rows** - Inserts one or more rows into the sheet, with included
+    /// _query parameters_.
+    ///
+    /// If you want to insert the rows in any position but the default, use
+    /// [location-specifier attributes].
+    ///
+    /// [location-specifier attributes]: https://smartsheet.redoc.ly/tag/rowsRelated#section/Specify-Row-Location
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to add the rows to.
+    /// * `rows` - An array (list) of new Rows with the cell values to add.
+    /// * `allow_partial_success` - Default: `false`. When specified with a value
+    ///               of `true`, enables partial success for this bulk operation.
+    ///               See [Partial Success] for more information.
+    /// * `override_validation` - Default: `false`. If set to a value of `true`,
+    ///               allows a cell value outside of the validation limits. You
+    ///               must also specify **strict** on a per-cell level with a
+    ///               value of **false** to bypass value type checking.
+    ///
+    /// [Partial Success]: https://smartsheet.redoc.ly/#section/Work-at-Scale/Bulk-Operations
+    ///
+    /// # Docs
+    /// - <https://smartsheet.redoc.ly/#operation/rows-addToSheet>
+    ///
     pub async fn add_rows_with_params(
         &self,
         sheet_id: u64,
@@ -366,11 +405,54 @@ impl<'a> SmartsheetApi<'a> {
         .await
     }
 
+    /// **Update Rows** - Updates cell values in the specified rows,
+    /// expands/collapses the specified rows, and/or modifies the position of
+    /// specified rows (including indenting/outdenting). For detailed
+    /// information about changing row positions, see
+    /// [location-specifier attributes].
+    ///
+    /// [location-specifier attributes]: https://smartsheet.redoc.ly/tag/rowsRelated#section/Specify-Row-Location
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to update the rows in.
+    /// * `rows` - An array (list) of Rows with the updated cell values.
+    ///
+    /// # Docs
+    /// - <https://smartsheet.redoc.ly/#operation/update-rows>
+    ///
     pub async fn update_rows(&self, sheet_id: u64, rows: impl Into<Vec<Row>>) -> Result<RowResult> {
         self.update_rows_with_params(sheet_id, rows, None, None)
             .await
     }
 
+    /// **Update Rows** - Updates cell values in the specified rows,
+    /// with included _query parameters_.
+    ///
+    /// Alternatively, expands/collapses the specified rows, and/or modifies
+    /// the position of specified rows (including indenting/outdenting). For
+    /// detailed information about changing row positions, see
+    /// [location-specifier attributes].
+    ///
+    /// [location-specifier attributes]: https://smartsheet.redoc.ly/tag/rowsRelated#section/Specify-Row-Location
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to update the rows in.
+    /// * `rows` - An array (list) of Rows with the updated cell values.
+    /// * `allow_partial_success` - When specified with a value of `true`, enables
+    ///               partial success for this bulk operation. See [Partial
+    ///               Success] for more information.
+    /// * `override_validation` - If set to a value of `true`, allows a cell value
+    ///               outside of the validation limits. You must also specify **strict**
+    ///               on a per-cell level with a value of **false** to bypass value
+    ///               type checking.
+    ///
+    /// [Partial Success]: https://smartsheet.redoc.ly/#section/Work-at-Scale/Bulk-Operations
+    ///
+    /// # Docs
+    /// - <https://smartsheet.redoc.ly/#operation/update-rows>
+    ///
     pub async fn update_rows_with_params(
         &self,
         sheet_id: u64,
@@ -388,6 +470,7 @@ impl<'a> SmartsheetApi<'a> {
         .await
     }
 
+    /// Internal method to *add* or *update* rows in a sheet.
     pub(crate) async fn add_or_update_rows(
         &self,
         method: hyper::Method,
@@ -436,7 +519,7 @@ impl<'a> SmartsheetApi<'a> {
     ///               delete from the smartsheet.
     ///
     /// # Docs
-    /// - <https://smartsheet-platform.github.io/api-docs/#delete-rows>
+    /// - <https://smartsheet.redoc.ly/#operation/delete-rows>
     ///
     pub async fn delete_rows<const N: usize>(
         &self,
@@ -454,12 +537,12 @@ impl<'a> SmartsheetApi<'a> {
     /// * `sheet_id` - The Smartsheet to delete the rows from.
     /// * `row_ids` - An array (list) containing the IDs of the Rows to
     ///               delete from the smartsheet.
-    /// * `ignore_rows_not_found` -  Default: false. If set to false and any of
+    /// * `ignore_rows_not_found` -  Default: `false`. If set to `false` and any of
     ///              the specified Row IDs are not found, no rows are deleted,
     ///              and the "not found" error is returned.
     ///
     /// # Docs
-    /// - <https://smartsheet-platform.github.io/api-docs/#delete-rows>
+    /// - <https://smartsheet.redoc.ly/#operation/delete-rows>
     ///
     pub async fn delete_rows_with_params<const N: usize>(
         &self,

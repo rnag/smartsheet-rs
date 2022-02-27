@@ -190,7 +190,7 @@ async fn main() -> Result<()> {
     let smart = SmartsheetApi::from_env()?;
 
     let sheet = smart.get_sheet(SHEET_ID).await?;
-    let cols = ColumnMapper::new(&sheet.columns);
+    let cols = ColumnMapper::from(&sheet);
 
     // Create a `RowGetter` helper to find rows in a sheet by a condition
     // based on a *Column Name* and *Column Value*.
@@ -246,7 +246,7 @@ async fn main() -> Result<()> {
     let smart = SmartsheetApi::from_env()?;
 
     let index_result = smart.list_columns(SHEET_ID).await?;
-    let cols = ColumnMapper::new(&index_result.data);
+    let cols = ColumnMapper::from(&index_result);
 
     // Create a `CellFactory` helper to build out a list of cells to create
     // a `Row` from.

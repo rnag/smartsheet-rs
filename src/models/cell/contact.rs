@@ -1,23 +1,35 @@
 use serde::{Deserialize, Serialize};
 
-/// Represents a cell for a `CONTACT` or a `MULTI_CONTACT` column in a smartsheet.
+/// Represents a [Contact Option] for a cell for a `CONTACT` or a `MULTI_CONTACT`
+/// column in a smartsheet.
 ///
 /// Mainly used for deserialization purposes with the `Cell::contacts` method,
 /// for example to more easily retrieve the contact details (such as a list of
 /// emails) from a `CONTACT` or `MULTI_CONTACT` cell.
+///
+/// [Contact Option]: https://smartsheet-platform.github.io/api-docs/#contactoption-object
+///
 #[derive(Debug, Deserialize)]
 #[serde(tag = "objectType", rename = "CONTACT")]
 pub struct ContactOwned {
+    /// A parsable email address.
     pub email: String,
+    /// Can be a user's name, display name, or free text, such as a job class or TBD.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
 }
 
-/// Represents a cell for a `CONTACT` or a `MULTI_CONTACT` column in a smartsheet.
+/// Represents a [Contact Option] for a `CONTACT` or a `MULTI_CONTACT` column in
+/// a smartsheet.
+///
+/// [Contact Option]: https://smartsheet-platform.github.io/api-docs/#contactoption-object
+///
 #[derive(Serialize)]
 #[serde(tag = "objectType", rename = "CONTACT")]
 pub struct Contact<'a> {
+    /// A parsable email address.
     pub email: &'a str,
+    /// Can be a user's name, display name, or free text, such as a job class or TBD.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<&'a str>,
 }

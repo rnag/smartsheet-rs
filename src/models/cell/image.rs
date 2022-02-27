@@ -9,11 +9,11 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase")]
 pub struct Image {
     /// Image Id.
-    id: String,
+    pub id: String,
     /// Alternate text for the image.
-    alt_text: String,
+    pub alt_text: String,
     /// Original height (in pixels) of the uploaded image.
-    height: u64,
+    pub height: u64,
     /// Original width (in pixels) of the uploaded image.
-    width: u64,
+    pub width: u64,
 }

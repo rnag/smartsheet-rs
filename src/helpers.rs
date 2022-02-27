@@ -34,14 +34,14 @@ impl<'a> From<&'a Sheet> for ColumnMapper<'a> {
 }
 
 impl<'a> From<&'a Row> for ColumnMapper<'a> {
-    fn from(sheet_ref: &'a Row) -> Self {
-        Self::new(&sheet_ref.columns)
+    fn from(row_ref: &'a Row) -> Self {
+        Self::new(&row_ref.columns)
     }
 }
 
 impl<'a> From<&'a IndexResult<Column>> for ColumnMapper<'a> {
-    fn from(sheet_ref: &'a IndexResult<Column>) -> Self {
-        Self::new(&sheet_ref.data)
+    fn from(index_ref: &'a IndexResult<Column>) -> Self {
+        Self::new(&index_ref.data)
     }
 }
 

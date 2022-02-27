@@ -5,23 +5,24 @@ use core::fmt::Error;
 use core::option::Option;
 use core::option::Option::{None, Some};
 use core::result::Result::{Err, Ok};
-use serde::ser::SerializeStruct;
-use serde::{Deserialize, Serialize, Serializer};
+
+use serde::{Deserialize, Serialize};
 use serde_json::value::Value;
 use serde_json::{from_value, Number};
 
-#[derive(Default, Debug, Clone, PartialEq, Deserialize)]
+#[derive(Default, Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Cell {
     /// The Id of the column that the cell is located in.
     pub column_id: u64,
     /// Only returned if the include query string parameter contains
     /// `columnType`.
-    // #[serde(skip_serializing)]
+    #[serde(skip_serializing)]
     pub column_type: Option<String>,
     /// The format descriptor describing this cell's conditional format. Only
     /// returned if the include query string parameter contains `format` and
     /// this cell has a conditional format applied.
+    #[serde(skip_serializing)]
     pub conditional_format: Option<String>,
     /// Represents a hyperlink to a dashboard, report, sheet, or URL.
     ///
@@ -33,6 +34,7 @@ pub struct Cell {
     ///
     /// - https://smartsheet-platform.github.io/api-docs/#hyperlinks
     /// - https://smartsheet-platform.github.io/api-docs/#hyperlink-object
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub hyperlink: Option<Hyperlink>,
     /// `Cell.value` represents a cell's raw value and can be one of the
     /// following primitive JSON types: string, number, or Boolean, depending
@@ -41,6 +43,7 @@ pub struct Cell {
     /// # More info
     ///
     /// - https://smartsheet-platform.github.io/api-docs/#cell-reference
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub value: Option<CellValue>,
     /// `Cell.displayValue` is always a string and is only returned for certain
     /// column types. It represents the formatted value as it should be
@@ -55,7 +58,7 @@ pub struct Cell {
     /// # More info
     ///
     /// - https://smartsheet-platform.github.io/api-docs/#cell-reference
-    // #[serde(skip_serializing)]
+    #[serde(skip_serializing)]
     pub display_value: Option<String>,
     /// `Cell.objectValue` is an object representation of a cell's value and
     /// is currently used for adding or updating predecessor cell values, or
@@ -64,11 +67,12 @@ pub struct Cell {
     /// # More info
     ///
     /// - https://smartsheet-platform.github.io/api-docs/#cell-reference
-    // #[serde(skip_serializing)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub object_value: Option<Value>,
     /// The format descriptor. Only returned if the include query string
     /// parameter contains `format` and this cell has a non-default format
     /// applied.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub format: Option<String>,
     /// The formula for a cell, if set, for instance **=COUNTM([Assigned To]3)**.
     ///
@@ -76,8 +80,10 @@ pub struct Cell {
     /// the API call to return an error code. Instead, the response contains
     /// the same value as in the UI, such as
     /// `cell.value = "#CIRCULAR REFERENCE"`.
+    #[serde(skip_serializing)]
     pub formula: Option<String>,
     /// Cell Image object
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub image: Option<Image>,
     /// (Admin only) Indicates whether the cell value can contain a value
     /// outside of the validation limits (value = **true**). When using this
@@ -85,48 +91,17 @@ pub struct Cell {
     /// type checking. This property is honored for POST or PUT actions that
     /// update rows.
     #[serde(skip_deserializing)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub override_validation: Option<bool>,
     /// Set to false to enable lenient parsing. Defaults to true. You can
     /// specify this attribute in a request, but it is never present in a
     /// response.
     #[serde(skip_deserializing)]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub strict: Option<bool>,
     // TODO add below fields (low priority)
     // pub link_in_from_cell: Object,
     // pub links_out_to_cells: Object,
-}
-
-// TODO Update or remove this logic
-impl Serialize for Cell {
-    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut cell = serializer.serialize_struct("Cell", 3)?;
-        cell.serialize_field("columnId", &self.column_id)?;
-
-        if let Some(link) = &self.hyperlink {
-            cell.serialize_field("hyperlink", link)?;
-        }
-
-        if let Some(value) = &self.value {
-            cell.serialize_field("value", value)?;
-        }
-
-        if let Some(object_value) = &self.object_value {
-            cell.serialize_field("objectValue", object_value)?;
-        }
-
-        if let Some(strict) = &self.strict {
-            cell.serialize_field("strict", strict)?;
-        }
-
-        if let Some(override_validation) = &self.override_validation {
-            cell.serialize_field("overrideValidation", override_validation)?;
-        }
-
-        cell.end()
-    }
 }
 
 impl Cell {
@@ -349,8 +324,8 @@ mod test {
             indoc! {r#"
                 {
                   "columnId": 0,
-                  "strict": false,
-                  "overrideValidation": false
+                  "overrideValidation": false,
+                  "strict": false
                 }
             "#}
             .trim()
@@ -362,7 +337,7 @@ mod test {
         let c = Cell {
             column_id: 54321,
             column_type: Some("Testing".to_owned()),
-            conditional_format: None,
+            conditional_format: Some("Conditional Format".to_owned()),
             hyperlink: Some(Hyperlink {
                 url: "abc".to_owned(),
                 ..Default::default()
@@ -372,10 +347,16 @@ mod test {
             object_value: Some(json!(1.2)),
             format: Some("My format".to_owned()),
             formula: Some("My formula".to_owned()),
-            image: None,
-            override_validation: None,
-            strict: None,
+            image: Some(Image {
+                id: "My ID".to_string(),
+                alt_text: "My Text".to_string(),
+                height: 1,
+                width: 3,
+            }),
+            override_validation: Some(true),
+            strict: Some(false),
         };
+
         assert_eq!(
             to_string_pretty(&c).unwrap(),
             indoc! {r#"
@@ -385,7 +366,16 @@ mod test {
                     "url": "abc"
                   },
                   "value": "My value",
-                  "objectValue": 1.2
+                  "objectValue": 1.2,
+                  "format": "My format",
+                  "image": {
+                    "id": "My ID",
+                    "altText": "My Text",
+                    "height": 1,
+                    "width": 3
+                  },
+                  "overrideValidation": true,
+                  "strict": false
                 }
             "#}
             .trim()
