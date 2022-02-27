@@ -19,6 +19,7 @@ this crate.
 * [A Larger Example](#a-larger-example)
   * [Cells](#cells)
     * [Retrieve Cells](#retrieve-cells) 
+    * [Multi-Contact Cells](#multi-contact-cells)
   * [Rows](#rows)
     * [Retrieve Rows](#retrieve-rows)
     * [Create Rows](#create-rows)
