@@ -5,6 +5,8 @@ use std::time::Instant;
 
 use smartsheet_rs;
 use smartsheet_rs::models::Sheet;
+#[macro_use]
+extern crate log;
 
 use tabled::{Alignment, Footer, Header, Modify, Row, Style, TableIteratorExt, Tabled};
 
@@ -25,7 +27,7 @@ struct TableRow<'a> {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    pretty_env_logger::init();
+    sensible_env_logger::init!();
 
     let smart = smartsheet_rs::SmartsheetApi::from_env()?;
 
@@ -33,14 +35,12 @@ async fn main() -> Result<()> {
 
     let result = smart.list_sheets().await?;
 
-    println!("List Sheets completed in {:.2?}", start.elapsed());
-    println!();
+    trace!("List Sheets completed in {:.2?}", start.elapsed());
 
-    println!("Sheet Count:  {}", result.total_count);
-    println!("Total Pages:  {}", result.total_pages);
-    println!("Page Number:  {}", result.page_number);
-    println!("Page Size:    {}", result.page_size);
-    println!();
+    debug!("Sheet Count:  {}", result.total_count);
+    debug!("Total Pages:  {}", result.total_pages);
+    debug!("Page Number:  {}", result.page_number);
+    debug!("Page Size:    {}", result.page_size);
 
     // Print out the sheet data (IDs and names in this case) as a nicely
     // formatted table.
@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
     }
 
     //noinspection DuplicatedCode
-    println!(
+    debug!(
         "{}",
         rows.table()
             .with(Style::PSEUDO)
@@ -75,10 +75,9 @@ async fn main() -> Result<()> {
 #[allow(dead_code)]
 async fn print_info_on_first_sheet(sheets: &Vec<Sheet>) -> Result<()> {
     if let Some(sheet) = sheets.first() {
-        println!();
-        println!("First Sheet:");
-        println!("---");
-        println!("{:#?}", sheet);
+        debug!("First Sheet:");
+        debug!("---");
+        debug!("{:#?}", sheet);
 
         // Assert that expected values are *not* populated by default
         assert!(sheet.version.is_none(), "Expected `version` to be omitted");

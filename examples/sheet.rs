@@ -9,6 +9,8 @@ use std::time::Instant;
 use smartsheet_rs;
 use smartsheet_rs::models::{Column, Row};
 use smartsheet_rs::{CellGetter, ColumnMapper};
+#[macro_use]
+extern crate log;
 
 // A simple type alias so as to DRY.
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
@@ -27,7 +29,7 @@ async fn fetch_args() -> Result<u64> {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    pretty_env_logger::init();
+    sensible_env_logger::init!();
 
     let sheet_id = fetch_args().await?;
 
@@ -37,16 +39,16 @@ async fn main() -> Result<()> {
 
     let sheet = smart.get_sheet(sheet_id).await?;
 
-    println!("Get Sheet completed in {:.2?}", start.elapsed());
+    trace!("Get Sheet completed in {:.2?}", start.elapsed());
     println!();
 
     // Print out some basic info about the sheet
-    println!("Sheet Name:   {}", sheet.name);
-    println!("Sheet ID:     {}", sheet.id);
-    println!("Row Count:    {}", sheet.total_row_count);
-    println!("Columns:      {}", sheet.columns.len());
-    println!("Created At:   {}", sheet.created_at);
-    println!("Read Only:    {:?}", sheet.read_only);
+    debug!("Sheet Name:   {}", sheet.name);
+    debug!("Sheet ID:     {}", sheet.id);
+    debug!("Row Count:    {}", sheet.total_row_count);
+    debug!("Columns:      {}", sheet.columns.len());
+    debug!("Created At:   {}", sheet.created_at);
+    debug!("Read Only:    {:?}", sheet.read_only);
 
     // Assert some sheet properties are *not* populated in the response
     // by default.
@@ -88,38 +90,38 @@ async fn print_column_names_and_cell_values(row: Option<&Row>, cols: &Vec<Column
     let start = Instant::now();
 
     println!();
-    println!("Column Names and Values");
-    println!("---");
+    debug!("Column Names and Values");
+    debug!("---");
 
     for (col_name, _col_id) in &cols.name_to_id {
         if let Ok(cell) = get_cell.by_name(row, col_name) {
-            println!("Column Name: {}", col_name);
+            debug!("Column Name: {}", col_name);
             // Print out the cell value
             if let Ok(value) = cell.value_as_str() {
-                println!("Value (STRING): {:#?}", value);
+                debug!("Value (STRING): {:#?}", value);
             } else if let Ok(value) = cell.value_as_bool() {
-                println!("Value (BOOL):   {:#?}", value);
+                debug!("Value (BOOL):   {:#?}", value);
             } else if let Ok(value) = cell.value_as_f64() {
-                println!("Value (NUMBER): {:#?}", value);
+                debug!("Value (NUMBER): {:#?}", value);
             }
 
             // Print out the cell display value
             if let Ok(display_value) = cell.display_value_as_str() {
-                println!("Display Value: {:#?}", display_value);
+                debug!("Display Value: {:#?}", display_value);
             } else {
-                println!("Display Value: {:?}", cell.display_value);
+                debug!("Display Value: {:?}", cell.display_value);
             }
 
             // Print out the cell link, if it's set
             if let Ok(link) = cell.link_url() {
-                println!("Hyperlink URL: {}", link);
+                debug!("Hyperlink URL: {}", link);
             }
 
             println!();
         }
     }
 
-    println!("Print cell values completed in {:?}", start.elapsed());
+    debug!("Print cell values completed in {:?}", start.elapsed());
 
     Ok(())
 }

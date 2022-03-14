@@ -39,7 +39,7 @@ async fn fetch_args() -> Result<(u64, String)> {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    pretty_env_logger::init();
+    sensible_env_logger::init!();
 
     let (sheet_id, column_title) = fetch_args().await?;
 

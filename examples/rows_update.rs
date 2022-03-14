@@ -33,7 +33,7 @@ async fn fetch_args() -> Result<u64> {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    pretty_env_logger::init();
+    sensible_env_logger::init!();
 
     let sheet_id = fetch_args().await?;
 
