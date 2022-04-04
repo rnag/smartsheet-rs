@@ -42,7 +42,7 @@ Getting started with the `smartsheet-rs` library is easy:
 
    ```toml
    [dependencies]
-   smartsheet-rs = "0.5"
+   smartsheet-rs = "0.6"
    tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
    ```
 
@@ -74,8 +74,10 @@ have been implemented currently:
 
 - [List Sheets](https://smartsheet-platform.github.io/api-docs/#list-sheets)
 - [List Columns](https://smartsheet-platform.github.io/api-docs/#list-columns)
+- [List Attachments](https://smartsheet-platform.github.io/api-docs/#list-attachments)
 - [Get Sheet](https://smartsheet-platform.github.io/api-docs/#get-sheet)
 - [Get Column](https://smartsheet-platform.github.io/api-docs/#get-column)
+- [Get Attachment](https://smartsheet-platform.github.io/api-docs/#get-attachment)
 - [Get Row](https://smartsheet-platform.github.io/api-docs/#get-row)
 - [Add Rows](https://smartsheet-platform.github.io/api-docs/#add-rows)
 - [Update Rows](https://smartsheet-platform.github.io/api-docs/#update-rows)
@@ -336,7 +338,7 @@ To do this, disable the default "rust-tls" feature and enable the "native-tls" f
 
 ```toml
 [dependencies]
-smartsheet-rs = { version = "0.5", default-features = false, features = ["native-tls", "logging", "serde-std"] }
+smartsheet-rs = { version = "0.6", default-features = false, features = ["native-tls", "logging", "serde-std"] }
 ```
 
 [`hyper`]: https://docs.rs/hyper

@@ -47,8 +47,10 @@
 //!
 //! - [List Sheets](https://smartsheet-platform.github.io/api-docs/#list-sheets)
 //! - [List Columns](https://smartsheet-platform.github.io/api-docs/#list-columns)
+//! - [List Attachments](https://smartsheet-platform.github.io/api-docs/#list-attachments)
 //! - [Get Sheet](https://smartsheet-platform.github.io/api-docs/#get-sheet)
 //! - [Get Column](https://smartsheet-platform.github.io/api-docs/#get-column)
+//! - [Get Attachment](https://smartsheet-platform.github.io/api-docs/#get-attachment)
 //! - [Get Row](https://smartsheet-platform.github.io/api-docs/#get-row)
 //! - [Add Rows](https://smartsheet-platform.github.io/api-docs/#add-rows)
 //! - [Update Rows](https://smartsheet-platform.github.io/api-docs/#update-rows)
@@ -81,7 +83,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! smartsheet-rs = { version = "0.5", default-features = false, features = ["native-tls", "logging", "serde-std"] }
+//! smartsheet-rs = { version = "0.6", default-features = false, features = ["native-tls", "logging", "serde-std"] }
 //! ```
 //!
 //! [hyper]: https://docs.rs/hyper
