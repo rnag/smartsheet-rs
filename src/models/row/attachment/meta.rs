@@ -3,6 +3,13 @@ use crate::models::User;
 
 use serde::{Deserialize, Serialize};
 
+/// Represents meta details on an [Attachment] in Smartsheet.
+///
+/// Attachments can exist on a comment (that is, within a discussion), on a
+/// row, or on a sheet.
+///
+/// [Attachment]: https://smartsheet-platform.github.io/api-docs/#objects
+///
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AttachmentMeta {
