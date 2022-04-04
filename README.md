@@ -74,8 +74,10 @@ have been implemented currently:
 
 - [List Sheets](https://smartsheet-platform.github.io/api-docs/#list-sheets)
 - [List Columns](https://smartsheet-platform.github.io/api-docs/#list-columns)
+- [List Attachments](https://smartsheet-platform.github.io/api-docs/#list-attachments)
 - [Get Sheet](https://smartsheet-platform.github.io/api-docs/#get-sheet)
 - [Get Column](https://smartsheet-platform.github.io/api-docs/#get-column)
+- [Get Attachment](https://smartsheet-platform.github.io/api-docs/#get-attachment)
 - [Get Row](https://smartsheet-platform.github.io/api-docs/#get-row)
 - [Add Rows](https://smartsheet-platform.github.io/api-docs/#add-rows)
 - [Update Rows](https://smartsheet-platform.github.io/api-docs/#update-rows)
