@@ -11,6 +11,20 @@ Possible header types:
 
 ## [Unreleased]
 
+## v0.6.0 (2022-04-04)
+
+### Breaking Changes
+
+* Update model struct name: `Attachment` -> `AttachmentMeta`
+
+### Features
+
+* Add support for the following API methods:
+  - [List Attachments](https://smartsheet-platform.github.io/api-docs/#list-attachments)
+  - [Get Attachment](https://smartsheet-platform.github.io/api-docs/#get-attachment)
+* Add method `SmartsheetApi::list_attachments`
+* Add method `SmartsheetApi::get_attachment`
+
 ## v0.5.0 (2022-02-27)
 
 ### Features
