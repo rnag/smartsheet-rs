@@ -1,4 +1,4 @@
-use crate::models::{AccessLevel, Attachment, Cell, Column, Discussion, IndentEnabled, User};
+use crate::models::{AccessLevel, AttachmentMeta, Cell, Column, Discussion, IndentEnabled, User};
 use crate::types::Result;
 use crate::utils::is_default;
 
@@ -22,7 +22,7 @@ pub struct Row {
     /// Attachments on row. Only returned if the include query string
     /// parameter contains attachments.
     #[serde(skip_serializing)]
-    pub attachments: Option<Vec<Attachment>>,
+    pub attachments: Option<Vec<AttachmentMeta>>,
     /// Cells belonging to the row.
     pub cells: Vec<Cell>,
     /// Columns of row. Only returned if the include query string parameter

@@ -726,6 +726,80 @@ impl<'a> SmartsheetApi<'a> {
         Ok(column)
     }
 
+    /// **List Attachments** - Gets a list of all attachments that are on the
+    /// sheet, including sheet, row, and discussion-level attachments.
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to retrieve the attachments for.
+    ///
+    /// # Docs
+    /// - https://smartsheet-platform.github.io/api-docs/#list-attachments
+    ///
+    pub async fn list_attachments(&self, sheet_id: u64) -> Result<IndexResult<AttachmentMeta>> {
+        let url = format!(
+            "{}/{}/{}/{}",
+            self.endpoint, "sheets", sheet_id, "attachments"
+        );
+
+        debug!("URL: {}", url);
+
+        let req = Request::get(&url)
+            .header(AUTHORIZATION, &self.bearer_token)
+            .body(Body::empty())?;
+
+        let mut res = self.client.request(req).await?;
+        raise_for_status(url, &mut res).await?;
+
+        let start = Instant::now();
+
+        let attachments = into_struct_from_slice(res).await?;
+
+        debug!("Deserialize: {:?}", start.elapsed());
+
+        Ok(attachments)
+    }
+
+    /// **Get Attachment** - Retrieves an attachment by *id* from the
+    /// specified sheet.
+    ///
+    /// # Notes
+    ///
+    /// Fetches a temporary URL that allows you to download an attachment. The
+    /// `urlExpiresInMillis` attribute tells you how long the URL is valid.
+    ///
+    /// # Arguments
+    ///
+    /// * `sheet_id` - The Smartsheet to retrieve the attachments for.
+    /// * `attachment_id` - The Attachment Id to retrieve the data for.
+    ///
+    /// # Docs
+    /// - https://smartsheet-platform.github.io/api-docs/#get-attachment
+    ///
+    pub async fn get_attachment(&self, sheet_id: u64, attachment_id: u64) -> Result<Attachment> {
+        let url = format!(
+            "{}/{}/{}/{}/{}",
+            self.endpoint, "sheets", sheet_id, "attachments", attachment_id
+        );
+
+        debug!("URL: {}", url);
+
+        let req = Request::get(&url)
+            .header(AUTHORIZATION, &self.bearer_token)
+            .body(Body::empty())?;
+
+        let mut res = self.client.request(req).await?;
+        raise_for_status(url, &mut res).await?;
+
+        let start = Instant::now();
+
+        let attachment = into_struct_from_slice(res).await?;
+
+        debug!("Deserialize: {:?}", start.elapsed());
+
+        Ok(attachment)
+    }
+
     /// **Get Sheet By Name** - Convenience function to retrieve a specified
     /// sheet by name. Used for those times when you don't know the Sheet Id.
     ///

@@ -1,4 +1,4 @@
-use crate::models::{Attachment, User};
+use crate::models::{AttachmentMeta, User};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -10,5 +10,5 @@ pub struct Discussion {
     pub last_commented_at: String,
     pub last_commented_user: User,
     pub title: String,
-    pub comment_attachments: Option<Vec<Attachment>>,
+    pub comment_attachments: Option<Vec<AttachmentMeta>>,
 }
