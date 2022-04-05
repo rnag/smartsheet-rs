@@ -11,6 +11,14 @@ Possible header types:
 
 ## [Unreleased]
 
+## v0.6.1 (2022-04-05)
+
+### Bug Fixes
+
+* `AttachmentMeta`: make struct fields `parent_id` and `parent_type` as optional,
+  since they don't appear to be populated in a *Get Sheet* response.
+* Add an example `sheet_with_attachments` to confirm that this is now fixed.
+ 
 ## v0.6.0 (2022-04-04)
 
 ### Breaking Changes
