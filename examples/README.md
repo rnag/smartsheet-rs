@@ -28,7 +28,16 @@ API.
 
 ## Quickstart
 
-First, start out by cloning the GitHub project:
+[cargo-rx]: https://github.com/rnag/cargo-rx
+
+Install my crate [cargo-rx], which abstracts away `cargo run --example`.
+This provides a single `rx` command.
+
+```shell
+❯❯ cargo install cargo-rx
+```
+
+Now start out by cloning the GitHub project:
 
 ```shell
 ❯❯ git clone https://github.com/rnag/smartsheet-rs.git
@@ -40,14 +49,21 @@ Then, simply `cd` into the project folder:
 ❯❯ cd smartsheet-rs
 ```
 
-From here, you can use `cargo` to build and run
+From here, you can use `rx` to build and run
 any of the examples individually.
+
+If you run the command without any arguments, you can select
+from the list of available examples:
+
+```shell
+❯❯ rx
+```
 
 In particular, here's a simple example
 of retrieving a list of all sheets in the account:
 
 ```shell
-❯❯ cargo run --example sheets
+❯❯ rx sheets
 ```
 
 To get the ID of a sheet, you can either examine the
@@ -57,6 +73,8 @@ the Sheet *Settings* page in the Smartsheet web UI.
 Once you have the *sheet ID*, you can - for example -
 retrieve a list of all columns in the sheet:
 
+> Note: to pass arguments to a script, you can include them after the `--`.
+
 ```shell
-❯❯ cargo run --example columns <sheet-id>
+❯❯ rx columns -- <sheet-id>
 ```
