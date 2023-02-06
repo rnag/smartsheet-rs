@@ -42,7 +42,7 @@ Getting started with the `smartsheet-rs` library is easy:
 
    ```toml
    [dependencies]
-   smartsheet-rs = "0.6.1"
+   smartsheet-rs = "0.6.2"
    tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
    ```
 
@@ -338,7 +338,7 @@ To do this, disable the default "rust-tls" feature and enable the "native-tls" f
 
 ```toml
 [dependencies]
-smartsheet-rs = { version = "0.6.1", default-features = false, features = ["native-tls", "logging", "serde-std"] }
+smartsheet-rs = { version = "0.6.2", default-features = false, features = ["native-tls", "logging", "serde-std"] }
 ```
 
 [`hyper`]: https://docs.rs/hyper

@@ -83,7 +83,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! smartsheet-rs = { version = "0.6.1", default-features = false, features = ["native-tls", "logging", "serde-std"] }
+//! smartsheet-rs = { version = "0.6.2", default-features = false, features = ["native-tls", "logging", "serde-std"] }
 //! ```
 //!
 //! [hyper]: https://docs.rs/hyper
