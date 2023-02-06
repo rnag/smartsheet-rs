@@ -11,6 +11,12 @@ Possible header types:
 
 ## [Unreleased]
 
+## v0.6.2 (2023-02-05)
+
+### Bug Fixes
+
+* Fix readme badge, as per [badges/shields#8671](https://github.com/badges/shields/issues/8671).
+
 ## v0.6.1 (2022-04-05)
 
 ### Bug Fixes
